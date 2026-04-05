@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ははとも - 産後ママのための体験談プラットフォーム</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { font-family: 'Noto Sans JP', sans-serif; }
+  .font-serif { font-family: 'Noto Serif JP', serif; }
+  
+  :root {
+    --primary: #6D2E46;
+    --accent: #C97B6E;
+    --cream: #F7F0E8;
+    --light: #FDF9F5;
+  }
+
+  body { background-color: var(--light); }
+
+  .tab-active {
+    color: var(--primary);
+    border-bottom: 2px solid var(--primary);
+  }
+
+  .card-hover {
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(109,46,70,0.12);
+  }
+
+  .insight-bubble {
+    background: linear-gradient(135deg, #6D2E46 0%, #9B4A6B 100%);
+  }
+
+  .post-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(109,46,70,0.1);
+  }
+
+  .ai-response {
+    background: linear-gradient(135deg, #FDF0E8 0%, #FAE8DF 100%);
+    border-left: 3px solid var(--accent);
+  }
+
+  .tag-pill {
+    background: rgba(109,46,70,0.08);
+    color: var(--primary);
+  }
+
+  /* アニメーション */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in { animation: fadeInUp 0.4s ease forwards; }
+  .fade-in-delay-1 { animation: fadeInUp 0.4s ease 0.1s forwards; opacity: 0; }
+  .fade-in-delay-2 { animation: fadeInUp 0.4s ease 0.2s forwards; opacity: 0; }
+  .fade-in-delay-3 { animation: fadeInUp 0.4s ease 0.3s forwards; opacity: 0; }
+
+  /* モバイルフレーム */
+  .phone-frame {
+    width: 390px;
+    min-height: 844px;
+    border-radius: 44px;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.08);
+  }
+
+  .bottom-nav {
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(109,46,70,0.1);
+  }
+
+  .new-post-btn {
+    background: linear-gradient(135deg, #6D2E46, #9B4A6B);
+    box-shadow: 0 4px 16px rgba(109,46,70,0.35);
+  }
+
+  .reaction-btn:hover {
+    background: rgba(109,46,70,0.08);
+  }
+
+  .loading-dot {
+    animation: bounce 1.2s infinite;
+  }
+  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-6px); }
+  }
+
+  /* モックアップ全体レイアウト */
+  .mockup-wrapper {
+    background: linear-gradient(135deg, #F7F0E8 0%, #EDE0D4 50%, #E5D4C6 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 40px;
+  }
+
+  .screen-label {
+    font-size: 11px;
+    color: rgba(109,46,70,0.5);
+    text-align: center;
+    margin-top: 16px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<div class="mockup-wrapper flex-wrap">
+
+  <!-- ===== 画面1: タイムライン ===== -->
+  <div>
+    <div class="phone-frame bg-white" style="width:390px;">
+      
+      <!-- ステータスバー -->
+      <div class="px-6 pt-3 pb-1 flex justify-between items-center" style="background:#FDF9F5;">
+        <span class="text-xs font-medium text-gray-500">9:41</span>
+        <div class="flex gap-1 items-center">
+          <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 24 24"><path d="M1.5 8.5a13 13 0 0121 0M5 12a10 10 0 0114 0M8.5 15.5a6 6 0 017 0M12 19h.01"/></svg>
+          <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/></svg>
+        </div>
+      </div>
+
+      <!-- ヘッダー -->
+      <div class="px-5 pt-2 pb-3" style="background:#FDF9F5; border-bottom: 1px solid rgba(109,46,70,0.08);">
+        <div class="flex justify-between items-center mb-3">
+          <div>
+            <h1 class="font-serif text-xl font-semibold" style="color:#6D2E46;">ははとも</h1>
+            <p class="text-xs text-gray-400 mt-0.5">ひとりじゃない育児</p>
+          </div>
+          <div class="w-9 h-9 rounded-full flex items-center justify-center" style="background:rgba(109,46,70,0.08);">
+            <svg class="w-5 h-5" style="color:#6D2E46;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          </div>
+        </div>
+
+        <!-- タブ -->
+        <div class="flex gap-0 border-b border-gray-100">
+          <button class="px-4 py-2 text-sm font-medium tab-active">みんなの投稿</button>
+          <button class="px-4 py-2 text-sm font-medium text-gray-400">同じ月齢</button>
+          <button class="px-4 py-2 text-sm font-medium text-gray-400">フォロー中</button>
+        </div>
+      </div>
+
+      <!-- フィード -->
+      <div class="overflow-y-auto" style="height:640px; background:#F7F3EF;">
+        <div class="p-4 space-y-3">
+
+          <!-- 投稿カード1 -->
+          <div class="bg-white rounded-2xl p-4 card-hover fade-in" style="box-shadow:0 2px 12px rgba(109,46,70,0.07);">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background:linear-gradient(135deg,#6D2E46,#C97B6E);">3M</div>
+              <div>
+                <p class="text-xs font-medium text-gray-700">生後3ヶ月・1人目</p>
+                <p class="text-xs text-gray-400">32分前</p>
+              </div>
+              <span class="ml-auto tag-pill text-xs px-2 py-0.5 rounded-full font-medium">授乳</span>
+            </div>
+            
+            <!-- ユーザー投稿 -->
+            <div class="rounded-xl p-3 mb-2" style="background:#FDF9F5;">
+              <p class="text-sm text-gray-700 leading-relaxed">今日も母乳が足りてない気がして粉ミルクを足してしまった。完母にしたかったのに、なんか負けた気分...</p>
+            </div>
+
+            <!-- AIの視点チェンジ -->
+            <div class="ai-response rounded-xl p-3 mb-3">
+              <div class="flex items-center gap-1.5 mb-1.5">
+                <div class="w-4 h-4 rounded-full flex items-center justify-center" style="background:#C97B6E;">
+                  <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                </div>
+                <span class="text-xs font-semibold" style="color:#C97B6E;">視点チェンジ</span>
+              </div>
+              <p class="text-xs leading-relaxed text-gray-600">粉ミルクを使った = 赤ちゃんのお腹を満たし、ママの体も守った。どちらを選んでも、子どもを想う気持ちは同じです。</p>
+            </div>
+
+            <!-- リアクション -->
+            <div class="flex items-center gap-3 pt-1">
+              <button class="reaction-btn flex items-center gap-1 px-3 py-1.5 rounded-full text-xs text-gray-500 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                わかる 24
+              </button>
+              <button class="reaction-btn flex items-center gap-1 px-3 py-1.5 rounded-full text-xs text-gray-500 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                コメント 3
+              </button>
+            </div>
+          </div>
+
+          <!-- 投稿カード2 -->
+          <div class="bg-white rounded-2xl p-4 card-hover fade-in-delay-1" style="box-shadow:0 2px 12px rgba(109,46,70,0.07);">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background:linear-gradient(135deg,#2E6B4A,#5DA07B);">8M</div>
+              <div>
+                <p class="text-xs font-medium text-gray-700">生後8ヶ月・2人目</p>
+                <p class="text-xs text-gray-400">1時間前</p>
+              </div>
+              <span class="ml-auto tag-pill text-xs px-2 py-0.5 rounded-full font-medium">離乳食</span>
+            </div>
+            
+            <div class="rounded-xl p-3 mb-2" style="background:#FDF9F5;">
+              <p class="text-sm text-gray-700 leading-relaxed">今日の離乳食、またベビーフードに頼ってしまった。3日連続。手作りしてあげられなくてごめんって気持ちになる。</p>
+            </div>
+
+            <div class="ai-response rounded-xl p-3 mb-3">
+              <div class="flex items-center gap-1.5 mb-1.5">
+                <div class="w-4 h-4 rounded-full flex items-center justify-center" style="background:#C97B6E;">
+                  <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                </div>
+                <span class="text-xs font-semibold" style="color:#C97B6E;">視点チェンジ</span>
+              </div>
+              <p class="text-xs leading-relaxed text-gray-600">3日間、子どもの栄養を考え続けた。ベビーフードを選ぶのも、立派な育児の判断です。ミッション完遂。</p>
+            </div>
+
+            <div class="flex items-center gap-3 pt-1">
+              <button class="reaction-btn flex items-center gap-1 px-3 py-1.5 rounded-full text-xs text-gray-500 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                わかる 41
+              </button>
+              <button class="reaction-btn flex items-center gap-1 px-3 py-1.5 rounded-full text-xs text-gray-500 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                コメント 8
+              </button>
+            </div>
+          </div>
+
+          <!-- 同月齢バナー -->
+          <div class="rounded-2xl p-4 fade-in-delay-2" style="background:linear-gradient(135deg,#6D2E46,#9B4A6B);">
+            <p class="text-xs text-white/70 mb-1">あなたと同じ月齢のママ</p>
+            <p class="text-sm font-semibold text-white mb-2">生後3ヶ月・1人目のママが<br>今日 <span class="text-yellow-300 text-lg font-bold">47人</span> 投稿しました</p>
+            <button class="bg-white/20 text-white text-xs px-4 py-1.5 rounded-full font-medium">同じ月齢の投稿を見る →</button>
+          </div>
+
+          <!-- 投稿カード3 -->
+          <div class="bg-white rounded-2xl p-4 card-hover fade-in-delay-3" style="box-shadow:0 2px 12px rgba(109,46,70,0.07);">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background:linear-gradient(135deg,#8B4A4A,#C97B6E);">5M</div>
+              <div>
+                <p class="text-xs font-medium text-gray-700">生後5ヶ月・1人目</p>
+                <p class="text-xs text-gray-400">2時間前</p>
+              </div>
+              <span class="ml-auto tag-pill text-xs px-2 py-0.5 rounded-full font-medium">夜泣き</span>
+            </div>
+            
+            <div class="rounded-xl p-3 mb-2" style="background:#FDF9F5;">
+              <p class="text-sm text-gray-700 leading-relaxed">昨夜は3時間しか寝れなかった。もう限界かもって思ったけど、朝になったら笑顔で起きてきた。それだけで全部帳消しになる不思議。</p>
+            </div>
+
+            <div class="ai-response rounded-xl p-3 mb-3">
+              <div class="flex items-center gap-1.5 mb-1.5">
+                <div class="w-4 h-4 rounded-full flex items-center justify-center" style="background:#C97B6E;">
+                  <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                </div>
+                <span class="text-xs font-semibold" style="color:#C97B6E;">視点チェンジ</span>
+              </div>
+              <p class="text-xs leading-relaxed text-gray-600">3時間の睡眠で朝を迎えた。それでも笑顔で応えられた。これが愛情の形です。</p>
+            </div>
+
+            <div class="flex items-center gap-3 pt-1">
+              <button class="reaction-btn flex items-center gap-1 px-3 py-1.5 rounded-full text-xs text-gray-500 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                わかる 89
+              </button>
+              <button class="reaction-btn flex items-center gap-1 px-3 py-1.5 rounded-full text-xs text-gray-500 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                コメント 12
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 投稿ボタン -->
+      <div class="relative" style="height:0;">
+        <button class="new-post-btn absolute bottom-20 right-5 w-14 h-14 rounded-full flex items-center justify-center text-white z-10" style="bottom:-600px;">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        </button>
+      </div>
+
+      <!-- ボトムナビ -->
+      <div class="bottom-nav px-6 py-3 flex justify-around items-center" style="position:relative;">
+        <button class="flex flex-col items-center gap-1">
+          <svg class="w-5 h-5" style="color:#6D2E46;" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          <span class="text-xs font-medium" style="color:#6D2E46;">ホーム</span>
+        </button>
+        <button class="flex flex-col items-center gap-1">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <span class="text-xs text-gray-400">探す</span>
+        </button>
+        <button class="new-post-btn w-12 h-12 rounded-full flex items-center justify-center text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        </button>
+        <button class="flex flex-col items-center gap-1">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          <span class="text-xs text-gray-400">記録</span>
+        </button>
+        <button class="flex flex-col items-center gap-1">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          <span class="text-xs text-gray-400">マイページ</span>
+        </button>
+      </div>
+
+    </div>
+    <p class="screen-label">タイムライン</p>
+  </div>
+
+  <!-- ===== 画面2: 投稿・視点チェンジ（AI自動判定） ===== -->
+  <div>
+    <div class="phone-frame bg-white" style="width:390px;">
+
+      <!-- ステータスバー -->
+      <div class="px-6 pt-3 pb-1 flex justify-between items-center" style="background:#FDF9F5;">
+        <span class="text-xs font-medium text-gray-500">9:41</span>
+      </div>
+
+      <!-- ヘッダー -->
+      <div class="px-5 pt-2 pb-4" style="background:#FDF9F5; border-bottom:1px solid rgba(109,46,70,0.08);">
+        <div class="flex items-center gap-3">
+          <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
+            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          <h2 class="font-medium text-gray-800">今日のこと、話してみよう</h2>
+        </div>
+      </div>
+
+      <div class="overflow-y-auto p-4" style="height:700px;">
+
+        <!-- プロフィール -->
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background:linear-gradient(135deg,#6D2E46,#C97B6E);">3M</div>
+          <div>
+            <p class="text-xs font-medium text-gray-700">生後3ヶ月・1人目</p>
+            <p class="text-xs text-gray-400">しんどいことも、頑張ったことも、なんでも</p>
+          </div>
+        </div>
+
+        <!-- 入力エリア（共通・シンプル） -->
+        <div class="mb-3" id="input-area">
+          <textarea
+            id="post-text"
+            class="post-input w-full rounded-2xl p-4 text-sm text-gray-700 resize-none border border-gray-200 transition-all leading-relaxed"
+            style="min-height:110px; background:#FDF9F5;"
+            placeholder="今日どうだった？&#10;&#10;例）ベビーフードに頼った、初めて笑ってくれた、公園に行ってきた..."
+          ></textarea>
+          <div class="flex justify-end mt-1.5 px-1">
+            <span class="text-xs text-gray-400" id="char-count">0/200</span>
+          </div>
+        </div>
+
+        <!-- 投稿ボタン -->
+        <button id="post-btn" onclick="handlePost()" class="new-post-btn w-full py-3 rounded-2xl text-white font-semibold text-sm mb-5">
+          話してみる →
+        </button>
+
+        <!-- AI分析中（ローディング） -->
+        <div id="loading" style="display:none;" class="text-center py-6 mb-4">
+          <div class="flex justify-center gap-1.5 mb-2">
+            <div class="loading-dot w-2 h-2 rounded-full" style="background:#C97B6E;"></div>
+            <div class="loading-dot w-2 h-2 rounded-full" style="background:#C97B6E;"></div>
+            <div class="loading-dot w-2 h-2 rounded-full" style="background:#C97B6E;"></div>
+          </div>
+          <p class="text-xs text-gray-400">AIが読んでいます...</p>
+        </div>
+
+        <!-- 結果エリア（しんどい系） -->
+        <div id="result-tsurai" style="display:none;">
+          <div class="rounded-xl p-2.5 mb-3 border border-gray-100" style="background:#FDF9F5;">
+            <p class="text-sm text-gray-600 leading-relaxed" id="user-text-0"></p>
+          </div>
+          <div class="ai-response rounded-2xl p-4 mb-3">
+            <div class="flex items-center gap-1.5 mb-2">
+              <div class="w-4 h-4 rounded-full flex items-center justify-center" style="background:#C97B6E;">
+                <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+              </div>
+              <span class="text-xs font-semibold" style="color:#C97B6E;">視点チェンジ</span>
+              <span class="ml-auto text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">AI自動判定</span>
+            </div>
+            <p class="text-sm leading-relaxed text-gray-700">疲れていてもベビーフードを用意した。<span class="font-semibold" style="color:#6D2E46;">子どもの食事を一度も欠かさなかった</span>、という事実があります。罪悪感より先に「今日も子どもを生かした」という実績を受け取ってください。</p>
+          </div>
+          <p class="text-xs font-semibold text-gray-500 mb-2">同じ状況のママたちの声</p>
+          <div class="space-y-2 mb-4">
+            <div class="bg-white rounded-xl p-3 border border-gray-100">
+              <div class="flex items-center gap-2 mb-1">
+                <div class="w-5 h-5 rounded-full text-white text-xs flex items-center justify-center font-bold" style="background:#6D2E46;">7M</div>
+                <span class="text-xs text-gray-400">生後7ヶ月・1人目　3ヶ月前</span>
+              </div>
+              <p class="text-xs text-gray-600">ベビーフード2週間連続のことあった。子どもは今も元気に走り回ってる😊</p>
+            </div>
+            <div class="bg-white rounded-xl p-3 border border-gray-100">
+              <div class="flex items-center gap-2 mb-1">
+                <div class="w-5 h-5 rounded-full text-white text-xs flex items-center justify-center font-bold" style="background:#2E6B4A;">4M</div>
+                <span class="text-xs text-gray-400">生後4ヶ月・2人目　1週間前</span>
+              </div>
+              <p class="text-xs text-gray-600">2人目の時ほぼベビーフードだった。今はもう全然気にしてない。</p>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <button onclick="resetPost()" class="flex-1 py-2.5 rounded-xl text-sm font-medium text-gray-500 bg-gray-100">自分だけ保存</button>
+            <button class="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white" style="background:linear-gradient(135deg,#6D2E46,#9B4A6B);">みんなにシェア</button>
+          </div>
+        </div>
+
+        <!-- 結果エリア（頑張った系） -->
+        <div id="result-ganbatta" style="display:none;">
+          <div class="rounded-xl p-2.5 mb-3 border border-gray-100" style="background:#FDF9F5;">
+            <p class="text-sm text-gray-600 leading-relaxed" id="user-text-1"></p>
+          </div>
+          <div class="rounded-2xl p-4 mb-3" style="background:linear-gradient(135deg,#F0F9F4,#E8F5EE); border-left:3px solid #2E6B4A;">
+            <div class="flex items-center gap-1.5 mb-2">
+              <div class="w-4 h-4 rounded-full flex items-center justify-center" style="background:#2E6B4A;">
+                <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              <span class="text-xs font-semibold" style="color:#2E6B4A;">その調子！</span>
+              <span class="ml-auto text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">AI自動判定</span>
+            </div>
+            <p class="text-sm leading-relaxed text-gray-700"><span class="font-semibold" style="color:#2E6B4A;">毎日諦めずに向き合ってきた積み重ねが、今日につながりました。</span> この記録が、いつか誰かの希望になります。</p>
+          </div>
+          <p class="text-xs font-semibold text-gray-500 mb-2">同じ経験のママたちの声</p>
+          <div class="space-y-2 mb-4">
+            <div class="bg-white rounded-xl p-3 border border-gray-100">
+              <div class="flex items-center gap-2 mb-1">
+                <div class="w-5 h-5 rounded-full text-white text-xs flex items-center justify-center font-bold" style="background:#2E6B4A;">9M</div>
+                <span class="text-xs text-gray-400">生後9ヶ月・1人目　2ヶ月前</span>
+              </div>
+              <p class="text-xs text-gray-600">うちも3ヶ月かかったけど全部食べる日が来た！続けることが大事だと実感した。</p>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <button onclick="resetPost()" class="flex-1 py-2.5 rounded-xl text-sm font-medium text-gray-500 bg-gray-100">自分だけ保存</button>
+            <button class="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white" style="background:linear-gradient(135deg,#2E6B4A,#5DA07B);">みんなにシェア</button>
+          </div>
+        </div>
+
+        <!-- 結果エリア（日常系） -->
+        <div id="result-nichijo" style="display:none;">
+          <div class="rounded-xl p-2.5 mb-3 border border-gray-100" style="background:#FDF9F5;">
+            <p class="text-sm text-gray-600 leading-relaxed" id="user-text-2"></p>
+          </div>
+          <div class="rounded-2xl p-4 mb-3" style="background:linear-gradient(135deg,#FDF8EC,#FAF0DC); border-left:3px solid #C97B6E;">
+            <div class="flex items-center gap-1.5 mb-2">
+              <div class="w-4 h-4 rounded-full flex items-center justify-center" style="background:#C97B6E;">
+                <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm1 14H11v-2h2v2zm0-4H11V7h2v5z"/></svg>
+              </div>
+              <span class="text-xs font-semibold" style="color:#C97B6E;">今日の記録</span>
+              <span class="ml-auto text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">AI自動判定</span>
+            </div>
+            <p class="text-sm leading-relaxed text-gray-700"><span class="font-semibold" style="color:#6D2E46;">赤ちゃんにとって「初めて」の感覚を、今日あなたが届けました。</span> こういう日常の積み重ねが、子どもの世界を広げていきます。</p>
+          </div>
+          <p class="text-xs font-semibold text-gray-500 mb-2">似た投稿</p>
+          <div class="space-y-2 mb-4">
+            <div class="bg-white rounded-xl p-3 border border-gray-100">
+              <div class="flex items-center gap-2 mb-1">
+                <div class="w-5 h-5 rounded-full text-white text-xs flex items-center justify-center font-bold" style="background:#C97B6E;">4M</div>
+                <span class="text-xs text-gray-400">生後4ヶ月・1人目　5日前</span>
+              </div>
+              <p class="text-xs text-gray-600">公園デビューした！最初は泣いてたけど帰りは爆睡してた🌳</p>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <button onclick="resetPost()" class="flex-1 py-2.5 rounded-xl text-sm font-medium text-gray-500 bg-gray-100">自分だけ保存</button>
+            <button class="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white" style="background:linear-gradient(135deg,#6D2E46,#9B4A6B);">みんなにシェア</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <p class="screen-label">投稿 → AI自動判定 → 視点チェンジ</p>
+  </div>
+
+  <script>
+  // 文字数カウント
+  document.getElementById('post-text').addEventListener('input', function() {
+    document.getElementById('char-count').textContent = this.value.length + '/200';
+  });
+
+  function handlePost() {
+    const text = document.getElementById('post-text').value.trim();
+    if (!text) return;
+
+    // 入力エリアと投稿ボタンを非表示
+    document.getElementById('input-area').style.display = 'none';
+    document.getElementById('post-btn').style.display = 'none';
+    document.getElementById('loading').style.display = 'block';
+
+    // 1.2秒後にAI判定結果を表示（モックアップなのでキーワードで分岐）
+    setTimeout(() => {
+      document.getElementById('loading').style.display = 'none';
+
+      // キーワード判定（実際はAIが行う）
+      const tsuraiWords = ['辛い','つらい','しんどい','罪悪感','限界','疲れ','できない','ダメ','泣き止まない','食べない','寝ない','もう'];
+      const ganWords = ['できた','食べてくれた','笑った','初めて','成功','よかった','嬉しい','頑張った'];
+
+      let type = 'nichijo';
+      if (tsuraiWords.some(w => text.includes(w))) type = 'tsurai';
+      else if (ganWords.some(w => text.includes(w))) type = 'ganbatta';
+
+      document.getElementById('user-text-' + (type === 'tsurai' ? 0 : type === 'ganbatta' ? 1 : 2)).textContent = text;
+      document.getElementById('result-' + type).style.display = 'block';
+    }, 1200);
+  }
+
+  function resetPost() {
+    document.getElementById('post-text').value = '';
+    document.getElementById('char-count').textContent = '0/200';
+    document.getElementById('input-area').style.display = 'block';
+    document.getElementById('post-btn').style.display = 'block';
+    ['tsurai','ganbatta','nichijo'].forEach(t => {
+      document.getElementById('result-' + t).style.display = 'none';
+    });
+  }
+  </script>
+
+  <!-- ===== 画面3: マイページ ===== -->
+  <div>
+    <div class="phone-frame bg-white" style="width:390px;">
+
+      <!-- ステータスバー -->
+      <div class="px-6 pt-3 pb-1 flex justify-between items-center" style="background:#FDF9F5;">
+        <span class="text-xs font-medium text-gray-500">9:41</span>
+      </div>
+
+      <!-- プロフィールヘッダー -->
+      <div class="px-5 pt-4 pb-0" style="background:#FDF9F5;">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg" style="background:linear-gradient(135deg,#6D2E46,#C97B6E);">3M</div>
+          <div class="flex-1">
+            <p class="font-semibold text-gray-800">生後3ヶ月・1人目</p>
+            <p class="text-xs text-gray-400 mt-0.5">2024年12月〜</p>
+          </div>
+        </div>
+        <div class="flex gap-6 mb-4">
+          <div>
+            <span class="text-base font-bold" style="color:#6D2E46;">23</span>
+            <span class="text-xs text-gray-400 ml-1">投稿</span>
+          </div>
+          <div>
+            <span class="text-base font-bold" style="color:#6D2E46;">147</span>
+            <span class="text-xs text-gray-400 ml-1">わかる</span>
+          </div>
+        </div>
+        <div class="flex border-b border-gray-100">
+          <button class="px-4 py-2 text-sm font-medium tab-active">投稿</button>
+          <button class="px-4 py-2 text-sm font-medium text-gray-400">保存</button>
+        </div>
+      </div>
+
+      <!-- 自分の投稿フィード -->
+      <div class="overflow-y-auto" style="height:594px; background:#F7F3EF;">
+        <div class="p-4 space-y-3">
+
+          <!-- 投稿1 -->
+          <div class="bg-white rounded-2xl p-4" style="box-shadow:0 2px 12px rgba(109,46,70,0.07);">
+            <div class="flex justify-between items-start mb-2">
+              <span class="tag-pill text-xs px-2.5 py-0.5 rounded-full font-medium">離乳食</span>
+              <span class="text-xs text-gray-400">3月23日</span>
+            </div>
+            <p class="text-sm text-gray-700 leading-relaxed mb-2">今日もベビーフードに頼ってしまった。毎日手作りしてあげたいのに、疲れてしまって。罪悪感がある...</p>
+            <div class="ai-response rounded-xl p-3 mb-3">
+              <div class="flex items-center gap-1.5 mb-1">
+                <div class="w-3.5 h-3.5 rounded-full flex items-center justify-center" style="background:#C97B6E;">
+                  <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                </div>
+                <span class="text-xs font-semibold" style="color:#C97B6E;">視点チェンジ</span>
+              </div>
+              <p class="text-xs text-gray-600 leading-relaxed">子どもの食事を一度も欠かさなかった、という事実があります。ミッション完遂。</p>
+            </div>
+            <div class="flex items-center gap-4 text-xs text-gray-400">
+              <span>❤️ わかる 24</span>
+              <span>💬 3</span>
+            </div>
+          </div>
+
+          <!-- 投稿2 -->
+          <div class="bg-white rounded-2xl p-4" style="box-shadow:0 2px 12px rgba(109,46,70,0.07);">
+            <div class="flex justify-between items-start mb-2">
+              <span class="tag-pill text-xs px-2.5 py-0.5 rounded-full font-medium">夜泣き</span>
+              <span class="text-xs text-gray-400">3月22日</span>
+            </div>
+            <p class="text-sm text-gray-700 leading-relaxed mb-2">夜泣きで3時間しか寝れなかった。もう限界かも...</p>
+            <div class="ai-response rounded-xl p-3 mb-3">
+              <div class="flex items-center gap-1.5 mb-1">
+                <div class="w-3.5 h-3.5 rounded-full flex items-center justify-center" style="background:#C97B6E;">
+                  <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                </div>
+                <span class="text-xs font-semibold" style="color:#C97B6E;">視点チェンジ</span>
+              </div>
+              <p class="text-xs text-gray-600 leading-relaxed">3時間の睡眠で朝を迎えた。それでも笑顔で応えられた。これが愛情の形です。</p>
+            </div>
+            <div class="flex items-center gap-4 text-xs text-gray-400">
+              <span>❤️ わかる 41</span>
+              <span>💬 7</span>
+            </div>
+          </div>
+
+          <!-- 投稿3 -->
+          <div class="bg-white rounded-2xl p-4" style="box-shadow:0 2px 12px rgba(109,46,70,0.07);">
+            <div class="flex justify-between items-start mb-2">
+              <span class="tag-pill text-xs px-2.5 py-0.5 rounded-full font-medium">授乳</span>
+              <span class="text-xs text-gray-400">3月20日</span>
+            </div>
+            <p class="text-sm text-gray-700 leading-relaxed mb-2">今日も母乳が足りてない気がして粉ミルクを足してしまった。完母にしたかったのに。</p>
+            <div class="ai-response rounded-xl p-3 mb-3">
+              <div class="flex items-center gap-1.5 mb-1">
+                <div class="w-3.5 h-3.5 rounded-full flex items-center justify-center" style="background:#C97B6E;">
+                  <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                </div>
+                <span class="text-xs font-semibold" style="color:#C97B6E;">視点チェンジ</span>
+              </div>
+              <p class="text-xs text-gray-600 leading-relaxed">粉ミルクを選んだのは、赤ちゃんのお腹を満たすため。どちらを選んでも、想いは同じです。</p>
+            </div>
+            <div class="flex items-center gap-4 text-xs text-gray-400">
+              <span>❤️ わかる 18</span>
+              <span>💬 2</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ボトムナビ -->
+      <div class="bottom-nav px-6 py-3 flex justify-around items-center">
+        <button class="flex flex-col items-center gap-1">
+          <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          <span class="text-xs text-gray-400">ホーム</span>
+        </button>
+        <button class="flex flex-col items-center gap-1">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <span class="text-xs text-gray-400">探す</span>
+        </button>
+        <button class="new-post-btn w-12 h-12 rounded-full flex items-center justify-center text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        </button>
+        <button class="flex flex-col items-center gap-1">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          <span class="text-xs text-gray-400">記録</span>
+        </button>
+        <button class="flex flex-col items-center gap-1">
+          <svg class="w-5 h-5" style="color:#6D2E46;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          <span class="text-xs font-medium" style="color:#6D2E46;">マイページ</span>
+        </button>
+      </div>
+
+    </div>
+    <p class="screen-label">マイページ</p>
+  </div>
+
+</div>
+
+
+
+</body>
+</html>
