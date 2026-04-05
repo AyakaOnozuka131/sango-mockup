@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ははとも</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; height: 100%; font-family: 'Noto Sans JP', sans-serif; }
+
+  body {
+    background: linear-gradient(135deg, #F7F0E8 0%, #EDE0D4 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .phone {
+    width: 390px;
+    height: 844px;
+    background: #F7F3EF;
+    border-radius: 44px;
+    overflow: hidden;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.22), 0 0 0 1px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  @media (max-width: 430px) {
+    body { padding: 0; align-items: flex-start; }
+    .phone { width: 100vw; height: 100vh; border-radius: 0; box-shadow: none; }
+  }
+
+  .screen { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+  .screen.active { display: flex; }
+
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  .scroll-area::-webkit-scrollbar { display: none; }
+
+  .bottom-nav {
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(109,46,70,0.08);
+    padding: 8px 24px 16px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .nav-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    cursor: pointer; background: none; border: none; padding: 4px 10px;
+    border-radius: 12px; transition: background 0.15s;
+  }
+  .nav-btn:active { background: rgba(109,46,70,0.08); }
+
+  .status-bar {
+    background: #FDF9F5;
+    padding: 10px 20px 4px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-shrink: 0;
+  }
+
+  .header { background: #FDF9F5; padding: 8px 20px 0; flex-shrink: 0; }
+
+  .tab {
+    padding: 8px 14px; font-size: 13px; font-weight: 500; color: #9CA3AF;
+    border: none; border-bottom: 2px solid transparent;
+    background: none; cursor: pointer; white-space: nowrap; font-family: 'Noto Sans JP', sans-serif;
+  }
+  .tab.active { color: #6D2E46; border-bottom-color: #6D2E46; }
+
+  .card {
+    background: white; border-radius: 18px; padding: 14px;
+    box-shadow: 0 2px 12px rgba(109,46,70,0.07);
+    transition: transform 0.15s;
+  }
+  .card:active { transform: scale(0.99); }
+
+  .ai-bubble {
+    background: linear-gradient(135deg, #FDF0E8 0%, #FAE8DF 100%);
+    border-left: 3px solid #C97B6E;
+    border-radius: 12px; padding: 10px;
+  }
+
+  .tag {
+    background: rgba(109,46,70,0.08); color: #6D2E46;
+    font-size: 10px; padding: 2px 10px; border-radius: 20px; font-weight: 500;
+  }
+
+  .fab {
+    background: linear-gradient(135deg, #6D2E46, #9B4A6B);
+    box-shadow: 0 4px 16px rgba(109,46,70,0.35);
+    border: none; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .fab:active { transform: scale(0.95); box-shadow: 0 2px 8px rgba(109,46,70,0.2); }
+
+  .post-input {
+    width: 100%; background: #FDF9F5;
+    border: 1.5px solid #E8E3DE; border-radius: 16px;
+    padding: 14px; font-size: 14px; color: #374151;
+    resize: none; line-height: 1.65;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .post-input:focus {
+    outline: none; border-color: #6D2E46;
+    box-shadow: 0 0 0 3px rgba(109,46,70,0.1);
+  }
+
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-6px); }
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #C97B6E;
+    animation: bounce 1.2s infinite;
+  }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes heartPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.5); }
+    100% { transform: scale(1); }
+  }
+  .heart-pop { animation: heartPop 0.3s ease; }
+
+  .like-btn {
+    display: flex; align-items: center; gap: 4px;
+    padding: 5px 10px; border-radius: 20px; font-size: 12px; color: #6B7280;
+    background: none; border: none; cursor: pointer; font-family: 'Noto Sans JP', sans-serif;
+    transition: background 0.15s;
+  }
+  .like-btn:active { background: rgba(109,46,70,0.08); }
+  .like-btn.liked { color: #6D2E46; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp 0.35s ease forwards; }
+
+  .peer-banner {
+    background: linear-gradient(135deg, #6D2E46, #9B4A6B);
+    border-radius: 18px; padding: 16px;
+  }
+
+  .action-btn {
+    flex: 1; padding: 12px; border-radius: 14px; font-size: 13px;
+    font-weight: 600; border: none; cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif; transition: opacity 0.15s;
+  }
+  .action-btn:active { opacity: 0.85; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- ステータスバー -->
+  <div class="status-bar">
+    <span style="font-size:12px;font-weight:500;color:#6B7280;">9:41</span>
+    <div style="display:flex;gap:5px;align-items:center;">
+      <svg width="15" height="15" fill="none" stroke="#6B7280" stroke-width="2" viewBox="0 0 24 24"><path d="M1.5 8.5a13 13 0 0121 0M5 12a10 10 0 0114 0M8.5 15.5a6 6 0 017 0M12 19h.01"/></svg>
+      <svg width="22" height="12" viewBox="0 0 22 12"><rect x="0" y="1" width="18" height="10" rx="2" fill="none" stroke="#6B7280" stroke-width="1.5"/><rect x="1.5" y="2.5" width="12" height="7" rx="1" fill="#6B7280"/><path d="M19 4v4a2 2 0 000-4z" fill="#6B7280"/></svg>
+    </div>
+  </div>
+
+  <!-- ====== タイムライン ====== -->
+  <div class="screen active" id="screen-home">
+    <div class="header">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div>
+          <h1 style="font-family:'Noto Serif JP',serif;font-size:20px;font-weight:600;color:#6D2E46;margin:0;">ははとも</h1>
+          <p style="font-size:11px;color:#9CA3AF;margin:2px 0 0;">ひとりじゃない育児</p>
+        </div>
+        <button style="width:36px;height:36px;border-radius:50%;background:rgba(109,46,70,0.08);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+          <svg width="18" height="18" fill="none" stroke="#6D2E46" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        </button>
+      </div>
+      <div style="display:flex;border-bottom:1px solid #F0EBE6;overflow-x:auto;gap:0;">
+        <button class="tab active" onclick="switchTab(this)">みんなの投稿</button>
+        <button class="tab" onclick="switchTab(this)">同じ月齢</button>
+        <button class="tab" onclick="switchTab(this)">フォロー中</button>
+      </div>
+    </div>
+
+    <div class="scroll-area" style="padding:12px 16px;display:flex;flex-direction:column;gap:10px;">
+
+      <div class="card fade-up">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#6D2E46,#C97B6E);display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:700;flex-shrink:0;">3M</div>
+          <div style="flex:1;"><p style="font-size:11px;font-weight:500;color:#374151;margin:0;">生後3ヶ月・1人目</p><p style="font-size:10px;color:#9CA3AF;margin:1px 0 0;">32分前</p></div>
+          <span class="tag">授乳</span>
+        </div>
+        <div style="background:#FDF9F5;border-radius:12px;padding:10px;margin-bottom:8px;">
+          <p style="font-size:13px;color:#374151;line-height:1.65;margin:0;">今日も母乳が足りてない気がして粉ミルクを足してしまった。完母にしたかったのに、なんか負けた気分...</p>
+        </div>
+        <div class="ai-bubble" style="margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
+            <div style="width:13px;height:13px;border-radius:50%;background:#C97B6E;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="7" height="7" fill="white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+            </div>
+            <span style="font-size:10px;font-weight:600;color:#C97B6E;">視点チェンジ</span>
+          </div>
+          <p style="font-size:12px;color:#4B5563;line-height:1.6;margin:0;">粉ミルクを使った＝赤ちゃんのお腹を満たし、ママの体も守った。どちらを選んでも、子どもを想う気持ちは同じです。</p>
+        </div>
+        <div style="display:flex;gap:2px;">
+          <button class="like-btn" onclick="toggleLike(this,24)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            <span>わかる 24</span>
+          </button>
+          <button class="like-btn">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+            <span>3</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card" style="animation:fadeUp 0.35s ease 0.1s both;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#2E6B4A,#5DA07B);display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:700;flex-shrink:0;">8M</div>
+          <div style="flex:1;"><p style="font-size:11px;font-weight:500;color:#374151;margin:0;">生後8ヶ月・2人目</p><p style="font-size:10px;color:#9CA3AF;margin:1px 0 0;">1時間前</p></div>
+          <span class="tag">離乳食</span>
+        </div>
+        <div style="background:#FDF9F5;border-radius:12px;padding:10px;margin-bottom:8px;">
+          <p style="font-size:13px;color:#374151;line-height:1.65;margin:0;">今日の離乳食、またベビーフードに頼ってしまった。3日連続。手作りしてあげられなくてごめんって気持ちになる。</p>
+        </div>
+        <div class="ai-bubble" style="margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
+            <div style="width:13px;height:13px;border-radius:50%;background:#C97B6E;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="7" height="7" fill="white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+            </div>
+            <span style="font-size:10px;font-weight:600;color:#C97B6E;">視点チェンジ</span>
+          </div>
+          <p style="font-size:12px;color:#4B5563;line-height:1.6;margin:0;">3日間、子どもの栄養を考え続けた。ベビーフードを選ぶのも、立派な育児の判断です。ミッション完遂。</p>
+        </div>
+        <div style="display:flex;gap:2px;">
+          <button class="like-btn" onclick="toggleLike(this,41)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            <span>わかる 41</span>
+          </button>
+          <button class="like-btn">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+            <span>8</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="peer-banner" style="animation:fadeUp 0.35s ease 0.2s both;">
+        <p style="font-size:11px;color:rgba(255,255,255,0.7);margin:0 0 4px;">あなたと同じ月齢のママ</p>
+        <p style="font-size:13px;font-weight:600;color:white;margin:0 0 10px;">生後3ヶ月・1人目のママが<br>今日 <span style="color:#FDE68A;font-size:20px;font-weight:700;">47人</span> 投稿しました</p>
+        <button style="background:rgba(255,255,255,0.2);color:white;font-size:11px;padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-weight:500;font-family:'Noto Sans JP',sans-serif;">同じ月齢の投稿を見る →</button>
+      </div>
+
+      <div class="card" style="animation:fadeUp 0.35s ease 0.3s both;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#8B4A4A,#C97B6E);display:flex;align-items:center;justify-content:center;color:white;font-size:10px;font-weight:700;flex-shrink:0;">5M</div>
+          <div style="flex:1;"><p style="font-size:11px;font-weight:500;color:#374151;margin:0;">生後5ヶ月・1人目</p><p style="font-size:10px;color:#9CA3AF;margin:1px 0 0;">2時間前</p></div>
+          <span class="tag">夜泣き</span>
+        </div>
+        <div style="background:#FDF9F5;border-radius:12px;padding:10px;margin-bottom:8px;">
+          <p style="font-size:13px;color:#374151;line-height:1.65;margin:0;">昨夜は3時間しか寝れなかった。もう限界かもって思ったけど、朝になったら笑顔で起きてきた。それだけで全部帳消しになる不思議。</p>
+        </div>
+        <div class="ai-bubble" style="margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
+            <div style="width:13px;height:13px;border-radius:50%;background:#C97B6E;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="7" height="7" fill="white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+            </div>
+            <span style="font-size:10px;font-weight:600;color:#C97B6E;">視点チェンジ</span>
+          </div>
+          <p style="font-size:12px;color:#4B5563;line-height:1.6;margin:0;">3時間の睡眠で朝を迎えた。それでも笑顔で応えられた。これが愛情の形です。</p>
+        </div>
+        <div style="display:flex;gap:2px;">
+          <button class="like-btn" onclick="toggleLike(this,89)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            <span>わかる 89</span>
+          </button>
+          <button class="like-btn">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+            <span>12</span>
+          </button>
+        </div>
+      </div>
+
+      <div style="height:20px;"></div>
+    </div>
+
+    <!-- FAB -->
+    <button class="fab" onclick="showScreen('post')" style="position:absolute;bottom:76px;right:18px;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+      <svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+    </button>
+  </div>
+
+  <!-- ====== 投稿画面 ====== -->
+  <div class="screen" id="screen-post">
+    <div class="header" style="padding-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button onclick="showScreen('home')" style="width:32px;height:32px;border-radius:50%;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+          <svg width="20" height="20" fill="none" stroke="#374151" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <h2 style="font-size:15px;font-weight:500;color:#111827;margin:0;">今日のこと、話してみよう</h2>
+      </div>
+    </div>
+
+    <div class="scroll-area" style="padding:16px;">
+
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6D2E46,#C97B6E);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;flex-shrink:0;">3M</div>
+        <div>
+          <p style="font-size:12px;font-weight:500;color:#374151;margin:0;">生後3ヶ月・1人目</p>
+          <p style="font-size:11px;color:#9CA3AF;margin:1px 0 0;">しんどいことも頑張ったことも、なんでも</p>
+        </div>
+      </div>
+
+      <!-- 入力エリア -->
+      <div id="post-input-area">
+        <textarea id="post-textarea" class="post-input" rows="5"
+          placeholder="今日どうだった？&#10;&#10;例）ベビーフードに頼った&#10;　　初めて笑ってくれた&#10;　　公園に行ってきた..."></textarea>
+        <div style="display:flex;justify-content:flex-end;margin:6px 2px 16px;">
+          <span id="char-count" style="font-size:11px;color:#9CA3AF;">0/200</span>
+        </div>
+        <button onclick="handlePost()" class="fab" style="width:100%;border-radius:16px;padding:14px;font-size:14px;font-weight:600;color:white;font-family:'Noto Sans JP',sans-serif;">
+          話してみる →
+        </button>
+        <p style="text-align:center;font-size:11px;color:#C9B8B0;margin-top:10px;">AIが内容を読み取って視点チェンジを返します</p>
+      </div>
+
+      <!-- ローディング -->
+      <div id="post-loading" style="display:none;text-align:center;padding:40px 0;">
+        <div style="display:flex;justify-content:center;gap:6px;margin-bottom:10px;">
+          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+        <p style="font-size:12px;color:#9CA3AF;margin:0;">AIが読んでいます...</p>
+      </div>
+
+      <!-- 結果 -->
+      <div id="post-result" style="display:none;">
+        <div style="background:#FDF9F5;border-radius:12px;padding:12px;margin-bottom:12px;">
+          <p id="result-user-text" style="font-size:13px;color:#374151;line-height:1.65;margin:0;"></p>
+        </div>
+        <div id="result-bubble" style="border-radius:14px;padding:12px;margin-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+            <div id="result-icon" style="width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="8" height="8" fill="white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+            </div>
+            <span id="result-label" style="font-size:11px;font-weight:600;"></span>
+            <span style="margin-left:auto;font-size:10px;color:#9CA3AF;background:#F3F4F6;padding:2px 8px;border-radius:20px;">AI自動判定</span>
+          </div>
+          <p id="result-text" style="font-size:13px;color:#374151;line-height:1.65;margin:0;"></p>
+        </div>
+        <p id="result-voices-title" style="font-size:11px;font-weight:600;color:#6B7280;margin:0 0 8px;"></p>
+        <div id="result-voices" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <button class="action-btn" onclick="resetPost()" style="color:#6B7280;background:#F3F4F6;">自分だけ保存</button>
+          <button id="share-btn" class="action-btn" onclick="doShare()" style="color:white;">みんなにシェア</button>
+        </div>
+      </div>
+
+      <!-- シェア完了 -->
+      <div id="post-shared" style="display:none;text-align:center;padding:32px 0;">
+        <div style="font-size:36px;margin-bottom:10px;">✨</div>
+        <p style="font-size:15px;font-weight:600;color:#6D2E46;margin:0 0 6px;">シェアしました</p>
+        <p style="font-size:12px;color:#9CA3AF;margin:0 0 20px;">あなたの声が誰かの支えになります</p>
+        <button onclick="showScreen('home')" style="padding:10px 24px;border-radius:20px;font-size:13px;font-weight:500;color:white;background:linear-gradient(135deg,#6D2E46,#9B4A6B);border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;">タイムラインへ戻る</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ====== マイページ ====== -->
+  <div class="screen" id="screen-mypage">
+    <div class="header" style="padding-bottom:0;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#6D2E46,#C97B6E);display:flex;align-items:center;justify-content:center;color:white;font-size:15px;font-weight:700;">3M</div>
+        <div>
+          <p style="font-size:14px;font-weight:600;color:#111827;margin:0;">生後3ヶ月・1人目</p>
+          <p style="font-size:11px;color:#9CA3AF;margin:2px 0 0;">2024年12月〜</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:18px;margin-bottom:12px;">
+        <div><span style="font-size:16px;font-weight:700;color:#6D2E46;">23</span><span style="font-size:11px;color:#9CA3AF;margin-left:4px;">投稿</span></div>
+        <div><span style="font-size:16px;font-weight:700;color:#6D2E46;">147</span><span style="font-size:11px;color:#9CA3AF;margin-left:4px;">わかる</span></div>
+      </div>
+      <div style="display:flex;border-bottom:1px solid #F0EBE6;">
+        <button class="tab active">投稿</button>
+        <button class="tab">保存</button>
+      </div>
+    </div>
+    <div class="scroll-area" style="padding:12px 16px;display:flex;flex-direction:column;gap:10px;">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span class="tag">離乳食</span><span style="font-size:11px;color:#9CA3AF;">3月23日</span>
+        </div>
+        <p style="font-size:13px;color:#374151;line-height:1.6;margin:0 0 8px;">今日もベビーフードに頼ってしまった。毎日手作りしてあげたいのに、疲れてしまって。罪悪感がある...</p>
+        <div class="ai-bubble" style="margin-bottom:8px;">
+          <p style="font-size:11px;color:#4B5563;margin:0;">子どもの食事を一度も欠かさなかった、という事実があります。ミッション完遂。</p>
+        </div>
+        <div style="font-size:11px;color:#9CA3AF;">❤️ わかる 24　　💬 3</div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span class="tag">夜泣き</span><span style="font-size:11px;color:#9CA3AF;">3月22日</span>
+        </div>
+        <p style="font-size:13px;color:#374151;line-height:1.6;margin:0 0 8px;">夜泣きで3時間しか寝れなかった。もう限界かも...</p>
+        <div class="ai-bubble" style="margin-bottom:8px;">
+          <p style="font-size:11px;color:#4B5563;margin:0;">3時間の睡眠で朝を迎えた。それでも笑顔で応えられた。これが愛情の形です。</p>
+        </div>
+        <div style="font-size:11px;color:#9CA3AF;">❤️ わかる 41　　💬 7</div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span class="tag">授乳</span><span style="font-size:11px;color:#9CA3AF;">3月20日</span>
+        </div>
+        <p style="font-size:13px;color:#374151;line-height:1.6;margin:0 0 8px;">今日も母乳が足りてない気がして粉ミルクを足してしまった。完母にしたかったのに。</p>
+        <div class="ai-bubble" style="margin-bottom:8px;">
+          <p style="font-size:11px;color:#4B5563;margin:0;">粉ミルクを選んだのは、赤ちゃんのお腹を満たすため。どちらを選んでも、想いは同じです。</p>
+        </div>
+        <div style="font-size:11px;color:#9CA3AF;">❤️ わかる 18　　💬 2</div>
+      </div>
+      <div style="height:16px;"></div>
+    </div>
+  </div>
+
+  <!-- ボトムナビ -->
+  <div class="bottom-nav">
+    <button class="nav-btn" id="nav-home" onclick="showScreen('home')">
+      <svg width="20" height="20" fill="#6D2E46" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span style="font-size:10px;color:#6D2E46;font-weight:500;">ホーム</span>
+    </button>
+    <button class="nav-btn" id="nav-search">
+      <svg width="20" height="20" fill="none" stroke="#9CA3AF" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <span style="font-size:10px;color:#9CA3AF;">探す</span>
+    </button>
+    <button class="nav-btn" onclick="showScreen('post')" style="padding:0;">
+      <div class="fab" style="width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+        <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+      </div>
+    </button>
+    <button class="nav-btn" id="nav-record">
+      <svg width="20" height="20" fill="none" stroke="#9CA3AF" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      <span style="font-size:10px;color:#9CA3AF;">記録</span>
+    </button>
+    <button class="nav-btn" id="nav-mypage" onclick="showScreen('mypage')">
+      <svg width="20" height="20" fill="none" stroke="#9CA3AF" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+      <span style="font-size:10px;color:#9CA3AF;">マイページ</span>
+    </button>
+  </div>
+
+</div>
+
+<script>
+const PATTERNS = {
+  tsurai: {
+    label: '視点チェンジ', labelColor: '#C97B6E',
+    bubbleStyle: 'background:linear-gradient(135deg,#FDF0E8,#FAE8DF);border-left:3px solid #C97B6E;',
+    iconBg: '#C97B6E',
+    keywords: [['ベビーフード','レトルト','手作り','作れ'],['泣き止まない','泣く','夜泣き','寝ない','寝れない'],['母乳','ミルク','混合','完母']],
+    responses: [
+      { text: '疲れていてもベビーフードを用意した。<b style="color:#6D2E46;">子どもの食事を一度も欠かさなかった</b>、という事実があります。罪悪感より先に「今日も子どもを生かした」という実績を受け取ってください。', title:'同じ状況のママたちの声', voices:[{age:'7M',who:'生後7ヶ月・1人目',time:'3ヶ月前',text:'ベビーフード2週間連続のことあった。子どもは今も元気に走り回ってる😊'},{age:'4M',who:'生後4ヶ月・2人目',time:'1週間前',text:'2人目の時ほぼベビーフードだった。今はもう全然気にしてない。'}] },
+      { text: '<b style="color:#6D2E46;">泣き声に何時間も向き合い続けた</b>、それが今日のあなたの育児です。限界を感じながらも、そこにいてあげた事実を受け取ってください。', title:'同じ夜を過ごしたママたちの声', voices:[{age:'5M',who:'生後5ヶ月・1人目',time:'2週間前',text:'夜泣き2ヶ月続いた。でもある日突然寝るようになった。必ず終わりが来るよ。'},{age:'8M',who:'生後8ヶ月・2人目',time:'1ヶ月前',text:'夜泣きがしんどくて旦那と喧嘩したこともある。今は笑い話になってる。'}] },
+      { text: '母乳でもミルクでも混合でも、<b style="color:#6D2E46;">お腹を満たしてあげた事実は同じです</b>。どの選択も、子どもを想う気持ちから来ています。', title:'同じ悩みを持ったママたちの声', voices:[{age:'6M',who:'生後6ヶ月・1人目',time:'3ヶ月前',text:'完母諦めて混合にしたら、むしろ気持ちが楽になって子どもとの時間が増えた。'},{age:'4M',who:'生後4ヶ月・2人目',time:'2週間前',text:'完ミでも完母でも、今の子どもは元気そのもの。'}] },
+    ],
+    defaultText: '今日もしんどかったこと、ちゃんと受け取りました。<b style="color:#6D2E46;">それでも今日一日、子どもの隣にいた</b>。それで十分です。',
+    defaultTitle: '同じ状況のママたちの声',
+    defaultVoices: [{age:'3M',who:'生後3ヶ月・1人目',time:'1ヶ月前',text:'毎日しんどいけど、みんなそうだって分かってから少し楽になった。'},{age:'5M',who:'生後5ヶ月・2人目',time:'2週間前',text:'一人じゃないって思えるだけで全然違う。'}],
+    shareGradient: 'linear-gradient(135deg,#6D2E46,#9B4A6B)'
+  },
+  ganbatta: {
+    label: 'その調子！', labelColor: '#2E6B4A',
+    bubbleStyle: 'background:linear-gradient(135deg,#F0F9F4,#E8F5EE);border-left:3px solid #2E6B4A;',
+    iconBg: '#2E6B4A',
+    defaultText: '<b style="color:#2E6B4A;">毎日諦めずに向き合ってきた積み重ねが、今日につながりました。</b> この記録が、いつか誰かの希望になります。',
+    defaultTitle: '同じ経験のママたちの声',
+    defaultVoices: [{age:'9M',who:'生後9ヶ月・1人目',time:'2ヶ月前',text:'小さな成長がこんなに嬉しいとは思わなかった。頑張ってよかった。'},{age:'6M',who:'生後6ヶ月・2人目',time:'1ヶ月前',text:'続けることが大事だと実感した。'}],
+    shareGradient: 'linear-gradient(135deg,#2E6B4A,#5DA07B)'
+  },
+  nichijo: {
+    label: '今日の記録', labelColor: '#C97B6E',
+    bubbleStyle: 'background:linear-gradient(135deg,#FDF8EC,#FAF0DC);border-left:3px solid #C97B6E;',
+    iconBg: '#C97B6E',
+    defaultText: '<b style="color:#6D2E46;">赤ちゃんにとって「初めて」の感覚を、今日あなたが届けました。</b> こういう日常の積み重ねが、子どもの世界を広げていきます。',
+    defaultTitle: '似た投稿',
+    defaultVoices: [{age:'4M',who:'生後4ヶ月・1人目',time:'5日前',text:'日常のこと書いてみたら、いい記録になった。'},{age:'2M',who:'生後2ヶ月・2人目',time:'2週間前',text:'外出るとなんか気持ちがリセットされる気がする。ママにも必要な時間。'}],
+    shareGradient: 'linear-gradient(135deg,#6D2E46,#9B4A6B)'
+  }
+};
+
+function detectType(text) {
+  const tsurai = ['辛い','つらい','しんどい','罪悪感','限界','疲れ','できない','ダメ','泣き止まない','食べない','寝ない','もう','ごめん','負けた','無理'];
+  const ganbatta = ['できた','食べてくれた','笑った','初めて','成功','よかった','嬉しい','頑張った','頑張れた','やれた'];
+  if (tsurai.some(w => text.includes(w))) return 'tsurai';
+  if (ganbatta.some(w => text.includes(w))) return 'ganbatta';
+  return 'nichijo';
+}
+
+function handlePost() {
+  const text = document.getElementById('post-textarea').value.trim();
+  if (!text) return;
+  document.getElementById('post-input-area').style.display = 'none';
+  document.getElementById('post-loading').style.display = 'block';
+
+  setTimeout(() => {
+    document.getElementById('post-loading').style.display = 'none';
+    const type = detectType(text);
+    const p = PATTERNS[type];
+
+    document.getElementById('result-user-text').textContent = text;
+    document.getElementById('result-bubble').style.cssText = p.bubbleStyle + 'border-radius:14px;padding:12px;margin-bottom:14px;';
+    document.getElementById('result-icon').style.background = p.iconBg;
+    document.getElementById('result-label').textContent = p.label;
+    document.getElementById('result-label').style.color = p.labelColor;
+
+    let responseText = p.defaultText, title = p.defaultTitle, voices = p.defaultVoices;
+    if (type === 'tsurai' && p.keywords) {
+      for (let i = 0; i < p.keywords.length; i++) {
+        if (p.keywords[i].some(k => text.includes(k))) {
+          responseText = p.responses[i].text;
+          title = p.responses[i].title;
+          voices = p.responses[i].voices;
+          break;
+        }
+      }
+    }
+
+    document.getElementById('result-text').innerHTML = responseText;
+    document.getElementById('result-voices-title').textContent = title;
+
+    const voicesEl = document.getElementById('result-voices');
+    voicesEl.innerHTML = '';
+    voices.forEach(v => {
+      const el = document.createElement('div');
+      el.style.cssText = 'background:white;border-radius:12px;padding:10px;border:1px solid #F0EBE6;';
+      el.innerHTML = `<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px;">
+        <div style="width:18px;height:18px;border-radius:50%;background:#6D2E46;display:flex;align-items:center;justify-content:center;color:white;font-size:8px;font-weight:700;flex-shrink:0;">${v.age}</div>
+        <span style="font-size:10px;color:#9CA3AF;">${v.who}　${v.time}</span>
+      </div>
+      <p style="font-size:12px;color:#4B5563;line-height:1.5;margin:0;">${v.text}</p>`;
+      voicesEl.appendChild(el);
+    });
+
+    document.getElementById('share-btn').style.background = p.shareGradient;
+    document.getElementById('post-result').style.display = 'block';
+  }, 1200);
+}
+
+function resetPost() {
+  document.getElementById('post-textarea').value = '';
+  document.getElementById('char-count').textContent = '0/200';
+  document.getElementById('post-input-area').style.display = 'block';
+  document.getElementById('post-loading').style.display = 'none';
+  document.getElementById('post-result').style.display = 'none';
+  document.getElementById('post-shared').style.display = 'none';
+}
+
+function doShare() {
+  document.getElementById('post-result').style.display = 'none';
+  document.getElementById('post-shared').style.display = 'block';
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+
+  const navItems = { home: 'nav-home', mypage: 'nav-mypage' };
+  ['nav-home','nav-mypage'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const isActive = navItems[name] === id;
+    el.querySelector('svg').style.fill = isActive ? '#6D2E46' : 'none';
+    el.querySelector('svg').style.stroke = isActive ? 'none' : '#9CA3AF';
+    const span = el.querySelector('span');
+    if (span) { span.style.color = isActive ? '#6D2E46' : '#9CA3AF'; span.style.fontWeight = isActive ? '500' : '400'; }
+  });
+
+  if (name === 'post') resetPost();
+}
+
+function toggleLike(btn, original) {
+  const span = btn.querySelector('span');
+  const svg = btn.querySelector('svg');
+  const liked = btn.classList.toggle('liked');
+  if (liked) {
+    svg.setAttribute('fill', '#6D2E46'); svg.setAttribute('stroke', '#6D2E46');
+    span.textContent = 'わかる ' + (original + 1);
+    btn.classList.add('heart-pop');
+    setTimeout(() => btn.classList.remove('heart-pop'), 300);
+  } else {
+    svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor');
+    span.textContent = 'わかる ' + original;
+  }
+}
+
+function switchTab(el) {
+  el.closest('div').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+document.getElementById('post-textarea').addEventListener('input', function() {
+  const len = Math.min(this.value.length, 200);
+  if (this.value.length > 200) this.value = this.value.slice(0, 200);
+  document.getElementById('char-count').textContent = len + '/200';
+});
+</script>
+</body>
+</html>
