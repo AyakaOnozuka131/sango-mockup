@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ははとも</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --rose:#C2677A;--rose-d:#A84F62;--peach:#E8956D;
+  --cream:#FDF5F6;--cream-d:#F5D8DF;--bg:#FAF7F8;
+  --white:#FFFFFF;--g1:#111827;--g2:#374151;--g3:#6B7280;
+  --g4:#9CA3AF;--g5:#E5E7EB;--border:#EDD5DA;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+html,body{height:100%;font-family:'Noto Sans JP',sans-serif;}
+body{background:#E8C8D0;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+.phone{width:390px;height:844px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 32px 80px rgba(162,79,98,0.25),0 0 0 1px rgba(0,0,0,0.05);display:flex;flex-direction:column;}
+@media(max-width:430px){body{padding:0;}.phone{width:100vw;height:100vh;border-radius:0;box-shadow:none;}}
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.screen.active{display:flex;}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+.scroll::-webkit-scrollbar{display:none;}
+.statusbar{background:var(--white);padding:10px 20px 6px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.header{background:var(--white);padding:10px 20px 14px;flex-shrink:0;border-bottom:1px solid var(--border);}
+.nav{background:var(--white);border-top:1px solid var(--border);padding:8px 0 16px;display:flex;justify-content:space-around;align-items:center;flex-shrink:0;}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:4px 16px;border-radius:12px;transition:background .15s;position:relative;}
+.nav-btn:active{background:var(--cream);}
+.nav-btn svg{width:22px;height:22px;}
+.nav-btn span{font-size:10px;font-family:'Noto Sans JP',sans-serif;}
+.badge{position:absolute;top:2px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--rose);border:1.5px solid var(--white);display:none;}
+
+/* 入力 */
+.input-wrap{background:var(--white);border-top:1px solid var(--border);padding:10px 16px 12px;flex-shrink:0;}
+.input-row{display:flex;gap:8px;align-items:flex-end;}
+.chat-input{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:22px;padding:10px 16px;font-size:14px;color:var(--g2);resize:none;line-height:1.5;max-height:90px;font-family:'Noto Sans JP',sans-serif;transition:border-color .2s;overflow-y:auto;}
+.chat-input:focus{outline:none;border-color:var(--rose);}
+.chat-input::placeholder{color:var(--g4);}
+.send-btn{width:40px;height:40px;border-radius:50%;background:var(--rose);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(194,103,122,0.3);transition:transform .15s,background .15s;}
+.send-btn:active{transform:scale(.92);background:var(--rose-d);}
+
+/* ローディング */
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--peach);animation:bounce 1.2s infinite;display:inline-block;}
+.dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
+
+/* カード */
+.card{background:var(--white);border-radius:14px;padding:14px;border:1px solid var(--border);}
+.tag{background:var(--cream);color:var(--rose);font-size:10px;padding:2px 8px;border-radius:6px;font-weight:500;border:1px solid var(--border);}
+
+/* わかるボタン */
+.wakaru-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;background:var(--white);border:1px solid var(--border);font-size:12px;color:var(--g3);cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .15s;}
+.wakaru-btn.on{background:var(--cream);border-color:var(--rose);color:var(--rose);}
+@keyframes heartPop{0%{transform:scale(1)}40%{transform:scale(1.5)}100%{transform:scale(1)}}
+.heart-pop{animation:heartPop .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .35s ease forwards;}
+
+/* うちはこうしてるカード */
+.uchi-card{background:var(--white);border-radius:12px;padding:12px 14px;border:1px solid var(--border);display:flex;flex-direction:column;gap:8px;}
+.uchi-count{background:var(--rose);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;}
+.uchi-item{background:var(--bg);border-radius:10px;padding:10px 12px;}
+
+/* ボタン */
+.btn-primary{width:100%;padding:14px;border-radius:10px;background:var(--rose);color:white;font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:background .15s;}
+.btn-primary:active{background:var(--rose-d);}
+
+/* セルフチェック */
+.check-btn{width:100%;padding:12px 14px;border-radius:10px;font-size:13px;text-align:left;background:var(--white);border:1px solid var(--g5);cursor:pointer;font-family:'Noto Sans JP',sans-serif;color:var(--g2);transition:all .15s;}
+.check-btn:active{border-color:var(--rose);background:var(--cream);}
+
+/* その後カード */
+.after-now{background:linear-gradient(135deg,#F0F9F4,#E8F5EE);border-radius:10px;padding:10px 12px;border-left:3px solid #2E7D6E;margin-top:8px;}
+.ago-tag{background:var(--cream);color:var(--rose);font-size:11px;padding:5px 12px;border-radius:20px;font-weight:500;border:1px solid var(--border);cursor:pointer;transition:all .15s;white-space:nowrap;font-family:'Noto Sans JP',sans-serif;}
+.ago-tag.sel{background:var(--rose);color:white;border-color:var(--rose);}
+</style>
+</head>
+<body>
+<div class="phone">
+
+<div class="statusbar">
+  <span style="font-size:12px;font-weight:500;color:var(--g3);">9:41</span>
+  <div style="display:flex;gap:5px;align-items:center;">
+    <svg width="15" height="15" fill="none" stroke="var(--g3)" stroke-width="2" viewBox="0 0 24 24"><path d="M1.5 8.5a13 13 0 0121 0M5 12a10 10 0 0114 0M8.5 15.5a6 6 0 017 0M12 19h.01"/></svg>
+    <svg width="22" height="12" viewBox="0 0 22 12"><rect x="0" y="1" width="18" height="10" rx="2" fill="none" stroke="var(--g3)" stroke-width="1.5"/><rect x="1.5" y="2.5" width="13" height="7" rx="1" fill="var(--g3)"/><path d="M19 4v4a2 2 0 000-4z" fill="var(--g3)"/></svg>
+  </div>
+</div>
+
+<!-- ====== 話す画面 ====== -->
+<div class="screen active" id="screen-talk">
+  <div class="header">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <h1 style="font-family:'BIZ UDPGothic',sans-serif;font-size:20px;font-weight:700;color:var(--rose);">ははとも</h1>
+        <p style="font-size:11px;color:var(--g4);margin-top:1px;">うちはこうしてる、が届きます</p>
+      </div>
+      <div style="text-align:right;">
+        <div style="background:var(--cream);border-radius:20px;padding:4px 10px;display:inline-block;">
+          <p style="font-size:10px;color:var(--rose);font-weight:600;">生後3ヶ月・1人目</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll" id="chat-area">
+    <div style="padding:16px;display:flex;flex-direction:column;gap:16px;">
+
+      <!-- 日付 -->
+      <div style="text-align:center;">
+        <span style="font-size:11px;color:var(--g4);background:var(--cream-d);padding:3px 14px;border-radius:20px;">3月23日（土）</span>
+      </div>
+
+      <!-- 最初のメッセージ -->
+      <div class="fade-up" style="background:var(--white);border-radius:16px;padding:14px;border:1px solid var(--border);">
+        <p style="font-size:13px;color:var(--g2);line-height:1.75;">今日はどうでしたか？<br>育児のこと、なんでも話してみてください。<br>同じ月齢のお母さんの「うちはこうしてる」が届きます。</p>
+        <p style="font-size:11px;color:var(--g4);margin-top:8px;">話した言葉は、同じ状況の誰かに届きます。</p>
+      </div>
+
+      <!-- サンプル：ユーザーの入力 -->
+      <div style="display:flex;justify-content:flex-end;">
+        <div style="background:var(--rose);color:white;border-radius:18px 18px 4px 18px;padding:12px 14px;font-size:13px;line-height:1.7;max-width:82%;box-shadow:0 2px 8px rgba(194,103,122,0.25);">母乳のあげ方が合ってるか不安。左右10分ずつあげてるんだけど...</div>
+      </div>
+
+      <!-- 返答 -->
+      <div class="fade-up" style="display:flex;flex-direction:column;gap:10px;">
+
+        <!-- ① 人数カウント -->
+        <div class="uchi-count">
+          <div>
+            <p style="font-size:11px;color:rgba(255,255,255,0.8);margin-bottom:2px;">生後3ヶ月・1人目で</p>
+            <p style="font-size:11px;color:rgba(255,255,255,0.8);">同じ悩みのお母さん</p>
+          </div>
+          <div style="margin-left:auto;text-align:center;">
+            <p style="font-size:40px;font-weight:700;color:white;line-height:1;">47</p>
+            <p style="font-size:11px;color:rgba(255,255,255,0.8);">人</p>
+          </div>
+        </div>
+
+        <!-- ② うちはこうしてる -->
+        <div class="uchi-card">
+          <p style="font-size:11px;font-weight:600;color:var(--rose);">うちはこうしてる</p>
+
+          <div class="uchi-item">
+            <p style="font-size:13px;color:var(--g2);line-height:1.65;margin-bottom:8px;">「左右10分ずつ、泣いたらすぐあげてる。完母3ヶ月続いてる」</p>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button class="wakaru-btn" onclick="tapW(this,38)">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                <span>わかる、うちも同じ　38</span>
+              </button>
+              <span style="font-size:10px;color:var(--g4);">生後3M・1人目</span>
+            </div>
+          </div>
+
+          <div class="uchi-item">
+            <p style="font-size:13px;color:var(--g2);line-height:1.65;margin-bottom:8px;">「完母諦めて混合にした。気持ちが楽になって子どもとの時間が増えた」</p>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button class="wakaru-btn" onclick="tapW(this,24)">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                <span>わかる、うちも同じ　24</span>
+              </button>
+              <span style="font-size:10px;color:var(--g4);">生後3M・2人目</span>
+            </div>
+          </div>
+
+          <div class="uchi-item">
+            <p style="font-size:13px;color:var(--g2);line-height:1.65;margin-bottom:8px;">「夜だけミルク足してる。そしたら少し寝てくれるようになった」</p>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button class="wakaru-btn" onclick="tapW(this,19)">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                <span>わかる、うちも同じ　19</span>
+              </button>
+              <span style="font-size:10px;color:var(--g4);">生後3M・1人目</span>
+            </div>
+          </div>
+
+          <!-- 課金壁 -->
+          <div style="position:relative;border-radius:10px;overflow:hidden;">
+            <div style="filter:blur(3px);pointer-events:none;">
+              <div class="uchi-item" style="margin-bottom:8px;">
+                <p style="font-size:13px;color:var(--g2);line-height:1.65;">「...」</p>
+              </div>
+            </div>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(253,245,246,0.92);border-radius:10px;padding:16px;text-align:center;">
+              <p style="font-size:12px;font-weight:600;color:var(--rose);margin-bottom:4px;">残り44人の「うちはこうしてる」を見る</p>
+              <p style="font-size:11px;color:var(--g3);margin-bottom:10px;">お母さんが整うと、赤ちゃんも安定します</p>
+              <button onclick="showScreen('paywall')" style="background:var(--rose);color:white;font-size:12px;font-weight:600;padding:8px 20px;border-radius:20px;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;">月額500円で全部見る</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ③ 小さなメッセージ -->
+        <div style="background:var(--white);border-radius:12px;padding:10px 14px;border:1px solid var(--border);">
+          <p style="font-size:11px;color:var(--g4);line-height:1.6;">今日の記録に残しました。あなたの「うちはこうしてる」が、同じ月齢の誰かに届きます。</p>
+        </div>
+
+      </div>
+
+      <div style="height:12px;"></div>
+    </div>
+  </div>
+
+  <div class="input-wrap">
+    <!-- ショートカットタグ -->
+    <div style="display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;padding-bottom:2px;">
+      <button onclick="setInput('夜泣きが続いてる')" style="background:var(--cream);color:var(--rose);font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);cursor:pointer;white-space:nowrap;font-family:'Noto Sans JP',sans-serif;">夜泣き</button>
+      <button onclick="setInput('母乳が足りてるか不安')" style="background:var(--cream);color:var(--rose);font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);cursor:pointer;white-space:nowrap;font-family:'Noto Sans JP',sans-serif;">授乳</button>
+      <button onclick="setInput('離乳食を全然食べてくれない')" style="background:var(--cream);color:var(--rose);font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);cursor:pointer;white-space:nowrap;font-family:'Noto Sans JP',sans-serif;">離乳食</button>
+      <button onclick="setInput('自分を責めてしまう')" style="background:var(--cream);color:var(--rose);font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);cursor:pointer;white-space:nowrap;font-family:'Noto Sans JP',sans-serif;">自分を責める</button>
+      <button onclick="setInput('夫が全然手伝わない')" style="background:var(--cream);color:var(--rose);font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);cursor:pointer;white-space:nowrap;font-family:'Noto Sans JP',sans-serif;">夫の愚痴</button>
+    </div>
+    <div class="input-row">
+      <textarea id="talk-input" class="chat-input" rows="1" placeholder="今日どうだった？なんでも話して" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" onclick="sendTalk()">
+        <svg width="16" height="16" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== みんなの画面 ====== -->
+<div class="screen" id="screen-minna">
+  <div class="header">
+    <h1 style="font-family:'BIZ UDPGothic',sans-serif;font-size:20px;font-weight:700;color:var(--rose);">みんなの声</h1>
+    <p style="font-size:11px;color:var(--g4);margin-top:2px;">同じ月齢のお母さんが話していること</p>
+  </div>
+
+  <div class="scroll" style="padding:12px 16px;display:flex;flex-direction:column;gap:10px;">
+
+    <!-- 月齢フィルター -->
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;" id="minna-month-tags">
+      <button class="ago-tag sel" onclick="selMinnaTag(this)">生後3ヶ月</button>
+      <button class="ago-tag" onclick="selMinnaTag(this)">全月齢</button>
+      <button class="ago-tag" onclick="selMinnaTag(this)">生後4ヶ月</button>
+      <button class="ago-tag" onclick="selMinnaTag(this)">生後5ヶ月</button>
+    </div>
+
+    <!-- カード1 -->
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="width:30px;height:30px;border-radius:50%;background:var(--rose);display:flex;align-items:center;justify-content:center;color:white;font-size:9px;font-weight:700;flex-shrink:0;">3M</div>
+        <div style="flex:1;"><p style="font-size:11px;font-weight:500;color:var(--g2);">生後3ヶ月・1人目</p><p style="font-size:10px;color:var(--g4);margin-top:1px;">32分前</p></div>
+        <span class="tag">授乳</span>
+      </div>
+      <div style="background:var(--bg);border-radius:10px;padding:10px;margin-bottom:10px;">
+        <p style="font-size:13px;color:var(--g2);line-height:1.65;">母乳が足りてるか毎回不安。泣くたびにあげてるけど、これで合ってるのかな...</p>
+      </div>
+      <!-- うちはこうしてる（コンパクト） -->
+      <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:6px;">
+        <p style="font-size:10px;font-weight:600;color:var(--rose);">うちはこうしてる</p>
+        <div style="background:var(--bg);border-radius:8px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <p style="font-size:12px;color:var(--g2);line-height:1.5;flex:1;">泣いたらすぐあげる。時間気にしなくなったら楽になった</p>
+          <button class="wakaru-btn" style="flex-shrink:0;" onclick="tapW(this,38)">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            <span>38</span>
+          </button>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <p style="font-size:12px;color:var(--g2);line-height:1.5;flex:1;">混合にしたら気持ちが楽になった</p>
+          <button class="wakaru-btn" style="flex-shrink:0;" onclick="tapW(this,24)">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            <span>24</span>
+          </button>
+        </div>
+        <!-- 自分も投稿 -->
+        <button onclick="showUchiInput(this)" style="background:none;border:1.5px dashed var(--border);border-radius:8px;padding:8px;font-size:11px;color:var(--g4);cursor:pointer;font-family:'Noto Sans JP',sans-serif;text-align:left;width:100%;">＋ うちはこうしてる、を伝える</button>
+        <div class="uchi-post-area" style="display:none;">
+          <textarea style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--g2);resize:none;font-family:'Noto Sans JP',sans-serif;height:60px;" placeholder="うちはこうしてる（50文字以内）" maxlength="50"></textarea>
+          <div style="display:flex;justify-content:flex-end;margin-top:4px;">
+            <button onclick="postUchi(this)" style="background:var(--rose);color:white;font-size:11px;font-weight:600;padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;">送る</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- カード2 -->
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="width:30px;height:30px;border-radius:50%;background:var(--rose);display:flex;align-items:center;justify-content:center;color:white;font-size:9px;font-weight:700;flex-shrink:0;">3M</div>
+        <div style="flex:1;"><p style="font-size:11px;font-weight:500;color:var(--g2);">生後3ヶ月・2人目</p><p style="font-size:10px;color:var(--g4);margin-top:1px;">1時間前</p></div>
+        <span class="tag">夜泣き</span>
+      </div>
+      <div style="background:var(--bg);border-radius:10px;padding:10px;margin-bottom:10px;">
+        <p style="font-size:13px;color:var(--g2);line-height:1.65;">夜泣きが2週間続いてる。昨夜も3時間しか寝れなかった。もう限界かも...</p>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:6px;">
+        <p style="font-size:10px;font-weight:600;color:var(--rose);">うちはこうしてる</p>
+        <div style="background:var(--bg);border-radius:8px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <p style="font-size:12px;color:var(--g2);line-height:1.5;flex:1;">おくるみで包んだら少し落ち着いた</p>
+          <button class="wakaru-btn" style="flex-shrink:0;" onclick="tapW(this,31)">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            <span>31</span>
+          </button>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <p style="font-size:12px;color:var(--g2);line-height:1.5;flex:1;">添い乳始めたら少し寝てくれた。賛否あるけどうちは合った</p>
+          <button class="wakaru-btn" style="flex-shrink:0;" onclick="tapW(this,19)">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            <span>19</span>
+          </button>
+        </div>
+        <button onclick="showUchiInput(this)" style="background:none;border:1.5px dashed var(--border);border-radius:8px;padding:8px;font-size:11px;color:var(--g4);cursor:pointer;font-family:'Noto Sans JP',sans-serif;text-align:left;width:100%;">＋ うちはこうしてる、を伝える</button>
+        <div class="uchi-post-area" style="display:none;">
+          <textarea style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--g2);resize:none;font-family:'Noto Sans JP',sans-serif;height:60px;" placeholder="うちはこうしてる（50文字以内）" maxlength="50"></textarea>
+          <div style="display:flex;justify-content:flex-end;margin-top:4px;">
+            <button onclick="postUchi(this)" style="background:var(--rose);color:white;font-size:11px;font-weight:600;padding:6px 14px;border-radius:20px;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;">送る</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:16px;"></div>
+  </div>
+</div>
+
+<!-- ====== その後どうなった？画面 ====== -->
+<div class="screen" id="screen-after">
+  <div class="header">
+    <h1 style="font-family:'BIZ UDPGothic',sans-serif;font-size:20px;font-weight:700;color:var(--rose);">その後どうなった？</h1>
+    <p style="font-size:11px;color:var(--g4);margin-top:2px;">同じ悩みを持っていた先輩の今</p>
+  </div>
+
+  <div class="scroll" style="padding:12px 16px;display:flex;flex-direction:column;gap:10px;">
+
+    <!-- 検索 -->
+    <div class="card">
+      <p style="font-size:11px;font-weight:600;color:var(--g3);margin-bottom:8px;">月齢 × 悩みで検索</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;" id="after-month-tags">
+        <button class="ago-tag sel" onclick="selAfterTag(this,'month')">生後3ヶ月</button>
+        <button class="ago-tag" onclick="selAfterTag(this,'month')">生後4ヶ月</button>
+        <button class="ago-tag" onclick="selAfterTag(this,'month')">生後5ヶ月</button>
+        <button class="ago-tag" onclick="selAfterTag(this,'month')">生後6ヶ月</button>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;" id="after-worry-tags">
+        <button class="ago-tag sel" onclick="selAfterTag(this,'worry')">夜泣き</button>
+        <button class="ago-tag" onclick="selAfterTag(this,'worry')">授乳</button>
+        <button class="ago-tag" onclick="selAfterTag(this,'worry')">離乳食</button>
+        <button class="ago-tag" onclick="selAfterTag(this,'worry')">自分を責める</button>
+        <button class="ago-tag" onclick="selAfterTag(this,'worry')">夫</button>
+      </div>
+    </div>
+
+    <div style="background:var(--cream);border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:8px;">
+      <div style="width:6px;height:6px;border-radius:50%;background:var(--rose);flex-shrink:0;"></div>
+      <p style="font-size:11px;color:var(--rose);font-weight:500;">生後3ヶ月 × 夜泣き で悩んでいた <strong>23人</strong>のその後</p>
+    </div>
+
+    <!-- カード1 -->
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="width:30px;height:30px;border-radius:50%;background:var(--rose);display:flex;align-items:center;justify-content:center;color:white;font-size:9px;font-weight:700;flex-shrink:0;">9M</div>
+        <div>
+          <p style="font-size:11px;font-weight:500;color:var(--g2);">生後9ヶ月・1人目 — 今</p>
+          <p style="font-size:10px;color:var(--g4);margin-top:1px;">生後3ヶ月の時に夜泣きで悩んでいた</p>
+        </div>
+      </div>
+      <div style="background:var(--bg);border-radius:10px;padding:8px 10px;margin-bottom:8px;">
+        <p style="font-size:11px;color:var(--g3);font-style:italic;">当時：「夜泣きが2週間続いてる。もう限界かも...」</p>
+      </div>
+      <div class="after-now">
+        <p style="font-size:10px;font-weight:600;color:#2E7D6E;margin-bottom:4px;">📍 今（生後9ヶ月）</p>
+        <p style="font-size:12px;color:var(--g2);line-height:1.65;">「生後5ヶ月頃に突然寝るようになった。あの時は一生続くと思ってたけど、ちゃんと終わった。今が信じられないくらい懐かしい」</p>
+      </div>
+    </div>
+
+    <!-- カード2 -->
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="width:30px;height:30px;border-radius:50%;background:var(--rose);display:flex;align-items:center;justify-content:center;color:white;font-size:9px;font-weight:700;flex-shrink:0;">8M</div>
+        <div>
+          <p style="font-size:11px;font-weight:500;color:var(--g2);">生後8ヶ月・2人目 — 今</p>
+          <p style="font-size:10px;color:var(--g4);margin-top:1px;">生後3ヶ月の時に夜泣きで悩んでいた</p>
+        </div>
+      </div>
+      <div style="background:var(--bg);border-radius:10px;padding:8px 10px;margin-bottom:8px;">
+        <p style="font-size:11px;color:var(--g3);font-style:italic;">当時：「泣き止まなくて、自分がダメなのかと...」</p>
+      </div>
+      <div class="after-now">
+        <p style="font-size:10px;font-weight:600;color:#2E7D6E;margin-bottom:4px;">📍 今（生後8ヶ月）</p>
+        <p style="font-size:12px;color:var(--g2);line-height:1.65;">「今は夜普通に寝てる。必ず終わるよって言いたい。あの頃は本当に辛かったけど」</p>
+      </div>
+    </div>
+
+    <!-- 課金壁 -->
+    <div style="background:var(--white);border-radius:14px;padding:16px;border:1.5px solid var(--border);text-align:center;">
+      <p style="font-size:14px;font-weight:700;color:var(--rose);margin-bottom:6px;">残り21人のその後を見る</p>
+      <p style="font-size:12px;color:var(--g3);line-height:1.65;margin-bottom:14px;">お母さんが整うと、赤ちゃんも安定します。<br>自分を整えることが、赤ちゃんへの育児になります。</p>
+      <div style="background:var(--bg);border-radius:8px;padding:10px;margin-bottom:14px;text-align:left;">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;align-items:center;gap:8px;"><span>🌸</span><p style="font-size:11px;color:var(--g2);margin:0;">月齢×悩みの「その後」が全件見られる</p></div>
+          <div style="display:flex;align-items:center;gap:8px;"><span>💬</span><p style="font-size:11px;color:var(--g2);margin:0;">「うちはこうしてる」を投稿できる</p></div>
+          <div style="display:flex;align-items:center;gap:8px;"><span style="color:#FDE68A;">⭐</span><p style="font-size:11px;color:var(--rose);font-weight:500;margin:0;">3ヶ月後の自分に今日の記録が届く</p></div>
+        </div>
+      </div>
+      <button class="btn-primary">月額500円で始める</button>
+      <p style="font-size:10px;color:var(--g4);margin-top:8px;">読むだけなら無料　いつでも解約できます</p>
+    </div>
+
+    <div style="height:16px;"></div>
+  </div>
+</div>
+
+<!-- ====== 記録画面 ====== -->
+<div class="screen" id="screen-log">
+  <div class="header">
+    <h1 style="font-family:'BIZ UDPGothic',sans-serif;font-size:20px;font-weight:700;color:var(--rose);">記録</h1>
+    <p style="font-size:11px;color:var(--g4);margin-top:2px;">誰にも見えない、あなただけの記録</p>
+  </div>
+  <div class="scroll" style="padding:12px 16px;display:flex;flex-direction:column;gap:10px;">
+
+    <!-- サマリー -->
+    <div style="background:var(--rose);border-radius:14px;padding:16px;">
+      <p style="font-size:11px;color:rgba(255,255,255,0.75);margin-bottom:8px;">3月のあなたへ</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:8px;text-align:center;">
+          <p style="font-size:22px;font-weight:700;color:white;">23</p>
+          <p style="font-size:10px;color:rgba(255,255,255,0.75);margin-top:2px;">話した日数</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:8px;text-align:center;">
+          <p style="font-size:22px;font-weight:700;color:#FDE68A;">47</p>
+          <p style="font-size:10px;color:rgba(255,255,255,0.75);margin-top:2px;">人に届いた</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3ヶ月前から -->
+    <div style="background:linear-gradient(135deg,var(--cream),var(--cream-d));border-radius:14px;padding:14px;border:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+        <span style="font-size:14px;">💌</span>
+        <p style="font-size:11px;font-weight:600;color:var(--rose);">3ヶ月前のあなたから</p>
+        <span style="font-size:10px;color:var(--g4);margin-left:auto;">12月23日</span>
+      </div>
+      <div style="background:white;border-radius:8px;padding:10px;margin-bottom:8px;">
+        <p style="font-size:12px;color:var(--g3);line-height:1.6;font-style:italic;margin-bottom:3px;">「夜泣きがまだ続いてる。毎晩2〜3時間しか寝れなくて、もうしんどい...」</p>
+        <p style="font-size:10px;color:var(--g4);">— 生後0ヶ月の時のあなた</p>
+      </div>
+      <p style="font-size:12px;color:var(--rose);font-weight:500;">あの頃から3ヶ月。今のあなたはどうですか？</p>
+    </div>
+
+    <!-- セルフチェック -->
+    <div onclick="showScreen('check')" style="background:white;border-radius:14px;padding:14px;border:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;">
+      <div style="width:40px;height:40px;border-radius:12px;background:var(--cream);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="20" height="20" fill="none" stroke="var(--rose)" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <div style="flex:1;">
+        <p style="font-size:12px;font-weight:600;color:var(--rose);">今週のこころの確認</p>
+        <p style="font-size:11px;color:var(--g4);margin-top:2px;">10問・5分 — 気づきのためのものです</p>
+      </div>
+      <svg width="16" height="16" fill="none" stroke="var(--peach)" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    </div>
+
+    <!-- 過去の記録 -->
+    <p style="font-size:11px;font-weight:600;color:var(--g3);margin:4px 0 0;">過去の記録</p>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:11px;color:var(--g4);">3月23日</span><span class="tag">授乳</span>
+      </div>
+      <p style="font-size:13px;color:var(--g2);line-height:1.6;margin-bottom:8px;">母乳のあげ方が合ってるか不安...</p>
+      <div style="background:var(--cream);border-radius:8px;padding:8px 10px;margin-bottom:6px;">
+        <p style="font-size:11px;color:var(--g2);margin:0;">同じ月齢のお母さん47人が同じ悩みを持っていました</p>
+      </div>
+      <p style="font-size:11px;color:var(--g4);">🌸 3人に届きました</p>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:11px;color:var(--g4);">3月22日</span><span class="tag">夜泣き</span>
+      </div>
+      <p style="font-size:13px;color:var(--g2);line-height:1.6;margin-bottom:8px;">夜泣きで3時間しか寝れなかった...</p>
+      <div style="background:var(--cream);border-radius:8px;padding:8px 10px;">
+        <p style="font-size:11px;color:var(--g2);margin:0;">夜泣きは生後2〜4ヶ月が最も多い時期。47人中38人が同じでした。</p>
+      </div>
+    </div>
+
+    <div style="height:16px;"></div>
+  </div>
+</div>
+
+<!-- ====== セルフチェック ====== -->
+<div class="screen" id="screen-check">
+  <div class="header">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button onclick="showScreen('log')" style="width:32px;height:32px;border-radius:50%;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+        <svg width="20" height="20" fill="none" stroke="var(--g2)" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <h2 style="font-size:15px;font-weight:500;color:var(--g1);">今週のこころの確認</h2>
+    </div>
+  </div>
+  <div class="scroll" style="padding:16px;display:flex;flex-direction:column;gap:12px;">
+    <div id="check-start">
+      <div style="background:linear-gradient(135deg,var(--cream),var(--cream-d));border-radius:14px;padding:18px;margin-bottom:14px;">
+        <p style="font-size:13px;color:var(--rose);font-weight:600;margin-bottom:6px;">気づくだけで、楽になれることがあります</p>
+        <p style="font-size:12px;color:var(--g3);line-height:1.65;">産後は気分の変化が起きやすい時期です。10問で今の自分の状態を確認してみましょう。</p>
+      </div>
+      <button onclick="startCheck()" class="btn-primary" style="margin-bottom:10px;">はじめる</button>
+      <p style="font-size:11px;color:var(--g4);text-align:center;">診断ではありません。気づきのためのものです。</p>
+    </div>
+    <div id="check-questions" style="display:none;">
+      <div style="margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span id="q-num" style="font-size:11px;color:var(--g4);">1 / 10</span>
+          <span id="q-pct" style="font-size:11px;color:var(--rose);font-weight:500;">10%</span>
+        </div>
+        <div style="background:var(--cream-d);border-radius:10px;height:5px;">
+          <div id="q-bar" style="background:var(--rose);height:5px;border-radius:10px;width:10%;transition:width .3s;"></div>
+        </div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:18px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+        <p style="font-size:11px;color:var(--g4);margin-bottom:8px;">過去7日間について</p>
+        <p id="q-text" style="font-size:15px;color:var(--g1);line-height:1.6;font-weight:500;"></p>
+      </div>
+      <div id="q-opts" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+    <div id="check-result" style="display:none;">
+      <div id="r-header" style="border-radius:14px;padding:18px;margin-bottom:14px;text-align:center;"></div>
+      <div style="background:white;border-radius:14px;padding:14px;margin-bottom:12px;">
+        <p id="r-detail" style="font-size:13px;color:var(--g2);line-height:1.7;white-space:pre-line;"></p>
+      </div>
+      <div id="r-action" style="display:none;background:linear-gradient(135deg,var(--cream),var(--cream-d));border-radius:14px;padding:14px;margin-bottom:14px;border-left:3px solid var(--peach);">
+        <p style="font-size:12px;font-weight:600;color:var(--rose);margin-bottom:4px;">よかったら、誰かに話してみませんか</p>
+        <p style="font-size:11px;color:var(--g3);line-height:1.6;">かかりつけの産婦人科や保健師さんに、今日の結果を見せながら話してみることもできます。</p>
+      </div>
+      <button onclick="showScreen('log')" class="btn-primary">記録に戻る</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 課金画面 ====== -->
+<div class="screen" id="screen-paywall">
+  <div class="header">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button onclick="history.back()||showScreen('talk')" style="width:32px;height:32px;border-radius:50%;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+        <svg width="20" height="20" fill="none" stroke="var(--g2)" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <h2 style="font-size:15px;font-weight:500;color:var(--g1);">ははとも プレミアム</h2>
+    </div>
+  </div>
+  <div class="scroll" style="padding:16px;display:flex;flex-direction:column;gap:12px;">
+
+    <div style="background:var(--rose);border-radius:16px;padding:20px;text-align:center;">
+      <p style="font-size:13px;color:rgba(255,255,255,0.85);margin-bottom:8px;">お母さんが整うと</p>
+      <p style="font-size:22px;font-weight:700;color:white;line-height:1.3;margin-bottom:8px;">赤ちゃんも安定します</p>
+      <p style="font-size:12px;color:rgba(255,255,255,0.8);line-height:1.65;">自分を整えることが、赤ちゃんへの一番の育児になります</p>
+    </div>
+
+    <div class="card">
+      <p style="font-size:12px;font-weight:600;color:var(--g3);margin-bottom:12px;">月額500円でできること</p>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="width:36px;height:36px;border-radius:10px;background:var(--cream);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">🔍</div>
+          <div>
+            <p style="font-size:13px;font-weight:600;color:var(--g1);margin-bottom:2px;">月齢×悩みの「その後」が全件見られる</p>
+            <p style="font-size:11px;color:var(--g4);line-height:1.5;">夜泣きで悩んだ先輩が今どうなっているか。どこにもない情報。</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="width:36px;height:36px;border-radius:10px;background:var(--cream);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">💬</div>
+          <div>
+            <p style="font-size:13px;font-weight:600;color:var(--g1);margin-bottom:2px;">「うちはこうしてる」を投稿できる</p>
+            <p style="font-size:11px;color:var(--g4);line-height:1.5;">あなたの経験が、同じ悩みの誰かを救います。</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="width:36px;height:36px;border-radius:10px;background:#FEF9EE;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">💌</div>
+          <div>
+            <p style="font-size:13px;font-weight:600;color:var(--g1);margin-bottom:2px;">3ヶ月後の自分に今日の記録が届く</p>
+            <p style="font-size:11px;color:var(--g4);line-height:1.5;">話し続けた記録が、未来の自分への手紙になります。</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="width:36px;height:36px;border-radius:10px;background:var(--cream);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;">📖</div>
+          <div>
+            <p style="font-size:13px;font-weight:600;color:var(--g1);margin-bottom:2px;">過去の記録が全部見られる</p>
+            <p style="font-size:11px;color:var(--g4);line-height:1.5;">話し続けるほど、自分だけの記録が育ちます。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" style="font-size:15px;">月額500円で始める</button>
+    <p style="font-size:11px;color:var(--g4);text-align:center;">いつでも解約できます</p>
+
+    <div style="height:16px;"></div>
+  </div>
+</div>
+
+<!-- ボトムナビ -->
+<div class="nav">
+  <button class="nav-btn" id="nav-talk" onclick="showScreen('talk')">
+    <svg fill="none" stroke="var(--rose)" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+    <span style="color:var(--rose);font-weight:500;">話す</span>
+  </button>
+  <button class="nav-btn" id="nav-minna" onclick="showScreen('minna')">
+    <svg fill="none" stroke="var(--g4)" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+    <span style="color:var(--g4);">みんな</span>
+  </button>
+  <button class="nav-btn" id="nav-after" onclick="showScreen('after')">
+    <svg fill="none" stroke="var(--g4)" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <span style="color:var(--g4);">その後</span>
+  </button>
+  <button class="nav-btn" id="nav-log" onclick="showScreen('log')">
+    <svg fill="none" stroke="var(--g4)" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+    <span style="color:var(--g4);">記録</span>
+  </button>
+</div>
+
+</div>
+<script>
+const NAV_MAP={talk:'nav-talk',minna:'nav-minna',after:'nav-after',log:'nav-log'};
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const t=document.getElementById('screen-'+name);if(t)t.classList.add('active');
+  Object.entries(NAV_MAP).forEach(([sc,id])=>{
+    const el=document.getElementById(id);if(!el)return;
+    const on=sc===name;
+    const svg=el.querySelector('svg');const span=el.querySelector('span');
+    if(svg)svg.style.stroke=on?'var(--rose)':'var(--g4)';
+    if(span){span.style.color=on?'var(--rose)':'var(--g4)';span.style.fontWeight=on?'500':'400';}
+  });
+  if(name==='check')resetCheck();
+}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,90)+'px';}
+function setInput(text){const inp=document.getElementById('talk-input');inp.value=text;autoResize(inp);inp.focus();}
+
+function tapW(btn,n){
+  const span=btn.querySelector('span');const svg=btn.querySelector('svg');
+  const on=btn.classList.toggle('on');
+  if(on){svg.setAttribute('fill','var(--rose)');svg.setAttribute('stroke','var(--rose)');span.textContent=(span.textContent.includes('わかる、うちも同じ')?'わかる、うちも同じ　'+(n+1):(n+1));svg.classList.add('heart-pop');setTimeout(()=>svg.classList.remove('heart-pop'),300);}
+  else{svg.setAttribute('fill','none');svg.setAttribute('stroke','currentColor');span.textContent=(span.textContent.includes('わかる、うちも同じ')?'わかる、うちも同じ　'+n:n);}
+}
+
+// うちはこうしてる入力
+function showUchiInput(btn){
+  const area=btn.nextElementSibling;
+  area.style.display=area.style.display==='none'?'block':'none';
+  btn.style.display=area.style.display==='block'?'none':'block';
+}
+function postUchi(btn){
+  const area=btn.closest('.uchi-post-area');
+  const text=area.querySelector('textarea').value.trim();
+  if(!text)return;
+  const parent=area.parentElement;
+  const newItem=document.createElement('div');
+  newItem.style.cssText='background:var(--bg);border-radius:8px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;';
+  newItem.innerHTML=`<p style="font-size:12px;color:var(--g2);line-height:1.5;flex:1;">${text}</p><button class="wakaru-btn" onclick="tapW(this,0)" style="flex-shrink:0;"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg><span>0</span></button>`;
+  parent.insertBefore(newItem,area);
+  area.style.display='none';
+  const toast=document.createElement('div');
+  toast.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2E7D6E;color:white;padding:10px 20px;border-radius:20px;font-size:12px;font-weight:500;z-index:999;font-family:"Noto Sans JP",sans-serif;white-space:nowrap;';
+  toast.textContent='届けました。ありがとう。';
+  document.body.appendChild(toast);setTimeout(()=>toast.remove(),2000);
+}
+
+// 話す画面
+const PATTERNS={
+  milk:{kw:['母乳','ミルク','混合','完母','授乳'],n:47,items:[
+    {t:'左右10分ずつ、泣いたらすぐあげてる。完母3ヶ月続いてる',w:38,age:'3M・1人目'},
+    {t:'完母諦めて混合にした。気持ちが楽になって子どもとの時間が増えた',w:24,age:'3M・2人目'},
+    {t:'夜だけミルク足してる。そしたら少し寝てくれるようになった',w:19,age:'3M・1人目'},
+  ]},
+  sleep:{kw:['泣き止まない','夜泣き','寝ない','寝れない'],n:38,items:[
+    {t:'おくるみで包んだら少し落ち着いた',w:31,age:'3M・1人目'},
+    {t:'添い乳始めたら少し寝てくれた。賛否あるけどうちは合った',w:19,age:'3M・2人目'},
+    {t:'白目音が流れるアプリ使ったら寝た。騙されたと思って試してみて',w:14,age:'3M・1人目'},
+  ]},
+  baby:{kw:['離乳食','食べ','食わ'],n:31,items:[
+    {t:'食べなくても気にしないようにした。食事の時間を楽しくするのが大事',w:28,age:'6M・1人目'},
+    {t:'ベビーフードに切り替えたら食べてくれた。手作りにこだわりすぎてた',w:22,age:'6M・2人目'},
+    {t:'食べなかった日は翌日食べてくれることが多かった',w:15,age:'6M・1人目'},
+  ]},
+  tsurai:{kw:['つらい','辛い','しんどい','罪悪感','限界','疲れ','ダメ','ごめん','無理','責め'],n:19,items:[
+    {t:'毎日自分を責めてた。でも子どもは笑ってくれてる。それだけで十分だと思うようにした',w:41,age:'3M・1人目'},
+    {t:'しんどい時は無理しない。ベビーフードでいい。掃除しなくていい',w:38,age:'4M・2人目'},
+    {t:'助けを求めることが子どものためになると気づいてから楽になった',w:29,age:'5M・1人目'},
+  ]},
+  otto:{kw:['夫','旦那','パパ','手伝','分かってくれない'],n:24,items:[
+    {t:'言わないと分からないと気づいてから、具体的にお願いするようにした',w:44,age:'4M・1人目'},
+    {t:'夜中の授乳だけ交代してもらうようにした。それだけで全然違う',w:31,age:'3M・2人目'},
+    {t:'諦めて外注した。家事代行週1回で気持ちが全然違う',w:18,age:'5M・1人目'},
+  ]},
+  default:{kw:[],n:7,items:[
+    {t:'今日も一日子どもの隣にいた。それだけで十分だと思うようにしてる',w:52,age:'3M・1人目'},
+    {t:'外に出るだけで気持ちがリセットされる。散歩おすすめ',w:38,age:'4M・2人目'},
+    {t:'完璧にやろうとするのをやめたら楽になった',w:31,age:'3M・1人目'},
+  ]}
+};
+
+function detect(text){
+  for(const[k,p]of Object.entries(PATTERNS)){if(p.kw.length&&p.kw.some(w=>text.includes(w)))return p;}
+  return PATTERNS.default;
+}
+
+function sendTalk(){
+  const inp=document.getElementById('talk-input');
+  const text=inp.value.trim();if(!text)return;
+  const wrap=document.getElementById('chat-area').querySelector('div[style*="display:flex;flex-direction:column"]')||document.getElementById('chat-area').firstElementChild;
+  const chatWrap=document.getElementById('chat-area').querySelector('div');
+
+  // ユーザー発言
+  const ud=document.createElement('div');
+  ud.style.cssText='display:flex;justify-content:flex-end;';
+  ud.innerHTML=`<div style="background:var(--rose);color:white;border-radius:18px 18px 4px 18px;padding:12px 14px;font-size:13px;line-height:1.7;max-width:82%;box-shadow:0 2px 8px rgba(194,103,122,0.25);">${text}</div>`;
+  chatWrap.appendChild(ud);
+  inp.value='';inp.style.height='auto';scrollChat();
+
+  // ローディング
+  const ld=document.createElement('div');
+  ld.style.cssText='background:var(--white);border-radius:14px;padding:14px;border:1px solid var(--border);display:flex;gap:6px;align-items:center;';
+  ld.innerHTML=`<div class="dot"></div><div class="dot"></div><div class="dot"></div>`;
+  chatWrap.appendChild(ld);scrollChat();
+
+  setTimeout(()=>{
+    ld.remove();
+    const p=detect(text);
+    const res=document.createElement('div');
+    res.className='fade-up';
+    res.style.cssText='display:flex;flex-direction:column;gap:10px;';
+
+    // 人数
+    const countEl=document.createElement('div');
+    countEl.className='uchi-count';
+    countEl.innerHTML=`<div><p style="font-size:11px;color:rgba(255,255,255,0.8);margin-bottom:2px;">生後3ヶ月・1人目で</p><p style="font-size:11px;color:rgba(255,255,255,0.8);">同じ悩みのお母さん</p></div><div style="margin-left:auto;text-align:center;"><p style="font-size:40px;font-weight:700;color:white;line-height:1;">${p.n}</p><p style="font-size:11px;color:rgba(255,255,255,0.8);">人</p></div>`;
+
+    // うちはこうしてる
+    const uchiEl=document.createElement('div');
+    uchiEl.className='uchi-card';
+    uchiEl.innerHTML=`<p style="font-size:11px;font-weight:600;color:var(--rose);">うちはこうしてる</p>
+    ${p.items.map(item=>`
+      <div class="uchi-item">
+        <p style="font-size:13px;color:var(--g2);line-height:1.65;margin-bottom:8px;">「${item.t}」</p>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button class="wakaru-btn" onclick="tapW(this,${item.w})">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            <span>わかる、うちも同じ　${item.w}</span>
+          </button>
+          <span style="font-size:10px;color:var(--g4);">生後${item.age}</span>
+        </div>
+      </div>`).join('')}
+      <div style="position:relative;border-radius:10px;overflow:hidden;">
+        <div style="filter:blur(3px);pointer-events:none;"><div class="uchi-item" style="min-height:80px;"><p style="font-size:13px;color:var(--g2);">「うちはこうしてる...」</p><div style="height:20px;"></div></div></div>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(253,245,246,0.92);border-radius:10px;padding:12px;text-align:center;">
+          <p style="font-size:12px;font-weight:600;color:var(--rose);margin-bottom:4px;">残り${p.n-3}人の「うちはこうしてる」を見る</p>
+          <button onclick="showScreen('paywall')" style="background:var(--rose);color:white;font-size:11px;font-weight:600;padding:7px 18px;border-radius:20px;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;margin-top:6px;">月額500円で全部見る</button>
+        </div>
+      </div>`;
+
+    // 小メッセージ
+    const msgEl=document.createElement('div');
+    msgEl.style.cssText='background:var(--white);border-radius:12px;padding:10px 14px;border:1px solid var(--border);';
+    msgEl.innerHTML=`<p style="font-size:11px;color:var(--g4);line-height:1.6;">今日の記録に残しました。あなたの言葉は匿名で、同じ状況の誰かに届きます。</p>`;
+
+    res.appendChild(countEl);
+    res.appendChild(uchiEl);
+    res.appendChild(msgEl);
+    chatWrap.appendChild(res);
+    scrollChat();
+  },1200);
+}
+
+function scrollChat(){const a=document.getElementById('chat-area');setTimeout(()=>a.scrollTop=a.scrollHeight,50);}
+document.getElementById('talk-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendTalk();}});
+
+// タグ選択
+function selMinnaTag(btn){
+  document.querySelectorAll('#minna-month-tags .ago-tag').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+function selAfterTag(btn,group){
+  const groupId=group==='month'?'after-month-tags':'after-worry-tags';
+  document.querySelectorAll('#'+groupId+' .ago-tag').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+// セルフチェック
+const QS=[
+  {q:'うまくいかない時に、自分のせいだと感じましたか？',opts:['いつもそうだった','たいていそうだった','あまりそうでなかった','全くそうでなかった'],sc:[3,2,1,0]},
+  {q:'楽しみにしていることに対して、あまり楽しめませんでしたか？',opts:['ほとんど楽しめなかった','あまり楽しめなかった','たいてい楽しめた','いつものように楽しめた'],sc:[3,2,1,0]},
+  {q:'はっきりした理由もないのに、不安になったり心配したりしましたか？',opts:['ほとんどそうだった','たまにそうだった','めったになかった','全くなかった'],sc:[3,2,1,0]},
+  {q:'理由もないのに、こわくなったりパニックになりましたか？',opts:['かなりあった','たまにあった','めったになかった','全くなかった'],sc:[3,2,1,0]},
+  {q:'することが山積みで、大変でしたか？',opts:['ほとんど対処できなかった','いつものようには対処できなかった','たいては対処できた','いつものように対処できた'],sc:[3,2,1,0]},
+  {q:'気分が沈んで、惨めな気持ちになりましたか？',opts:['ほとんどそうだった','かなりそうだった','あまりそうでなかった','全くそうでなかった'],sc:[3,2,1,0]},
+  {q:'不眠で悩みましたか？',opts:['ほとんどそうだった','たまにそうだった','あまりそうでなかった','全くそうでなかった'],sc:[3,2,1,0]},
+  {q:'悲しくなったり、惨めになったりしましたか？',opts:['ほとんどそうだった','かなりそうだった','あまりそうでなかった','全くそうでなかった'],sc:[3,2,1,0]},
+  {q:'気分が沈んで、泣けてきましたか？',opts:['ほとんどそうだった','かなりそうだった','たまにそうだった','全くそうでなかった'],sc:[3,2,1,0]},
+  {q:'自分自身を傷つけることを考えましたか？',opts:['かなりたびたびあった','たまにあった','めったになかった','全くなかった'],sc:[3,2,1,0]},
+];
+let scores=[],cur=0;
+function resetCheck(){scores=[];cur=0;document.getElementById('check-start').style.display='block';document.getElementById('check-questions').style.display='none';document.getElementById('check-result').style.display='none';}
+function startCheck(){document.getElementById('check-start').style.display='none';document.getElementById('check-questions').style.display='block';renderQ();}
+function renderQ(){
+  const q=QS[cur];const pct=Math.round((cur+1)/QS.length*100);
+  document.getElementById('q-num').textContent=(cur+1)+' / '+QS.length;
+  document.getElementById('q-pct').textContent=pct+'%';
+  document.getElementById('q-bar').style.width=pct+'%';
+  document.getElementById('q-text').textContent=q.q;
+  const opts=document.getElementById('q-opts');opts.innerHTML='';
+  q.opts.forEach((o,i)=>{const b=document.createElement('button');b.className='check-btn';b.textContent=o;b.onclick=()=>{b.style.borderColor='var(--rose)';b.style.background='var(--cream)';setTimeout(()=>answer(q.sc[i]),180);};opts.appendChild(b);});
+}
+function answer(s){scores.push(s);cur++;cur>=QS.length?showResult():renderQ();}
+function showResult(){
+  document.getElementById('check-questions').style.display='none';
+  document.getElementById('check-result').style.display='block';
+  document.querySelector('#screen-check .scroll').scrollTop=0;
+  const total=scores.reduce((a,b)=>a+b,0);
+  let emoji,title,sub,detail,bg,tc;
+  if(total<=8){emoji='🌿';title='今週は比較的安定しています';sub='育児お疲れ様です。';detail='今週は全体的に安定した気分で過ごせているようです。\n\n調子のいい日は、少し自分を労ってあげてください。';bg='background:linear-gradient(135deg,#F0F9F4,#E8F5EE);';tc='#2E6B4A';document.getElementById('r-action').style.display='none';}
+  else if(total<=12){emoji='🌤';title='ちょっと疲れがたまっているかも';sub='無理しすぎていませんか？';detail='今週はいつもより少し気分が揺れやすい状態のようです。\n\n「しんどいのは自分が弱いせい」ではなく、自然な反応です。';bg='background:linear-gradient(135deg,#FDF8EC,#FAF0DC);';tc='#92610A';document.getElementById('r-action').style.display='none';}
+  else{emoji='🌧';title='かなりしんどい状態が続いているようです';sub='あなたは一人じゃありません。';detail='今週はかなり気分が落ち込んでいる状態が続いているようです。\n\nこれはホルモン変化や睡眠不足が重なった自然な反応です。「弱いから」ではありません。\n\nこういった状態が2週間以上続いている場合は、信頼できる人に話してみてください。';bg='background:linear-gradient(135deg,#FCF0EE,#F9E4E0);';tc='#8B2A2A';document.getElementById('r-action').style.display='block';}
+  const rh=document.getElementById('r-header');
+  rh.style.cssText=bg+'border-radius:14px;padding:18px;margin-bottom:14px;text-align:center;';
+  rh.innerHTML=`<p style="font-size:32px;margin-bottom:6px;">${emoji}</p><p style="font-size:16px;font-weight:700;margin-bottom:6px;color:${tc};">${title}</p><p style="font-size:12px;line-height:1.6;opacity:0.85;color:${tc};">${sub}</p>`;
+  document.getElementById('r-detail').textContent=detail;
+}
+</script>
+</body>
+</html>
