@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ははとも</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F3EF;--card:#FEFCFA;--ink:#1A1714;--mid:#5C5550;--mute:#A09890;--line:#EAE6E0;
+  --green:#2A6049;--gl:#3D7A5E;--gbg:rgba(42,96,73,0.07);
+  --amber:#D4700A;--abg:rgba(212,112,10,0.08);
+  --rose:#B85068;--rbg:rgba(184,80,104,0.07);
+  --sage:#8AA68A;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+html,body{height:100%;font-family:'Noto Sans JP',sans-serif;}
+body{background:#DDD8D0;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+.phone{width:390px;height:844px;background:var(--bg);border-radius:46px;overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,0.16),0 0 0 1px rgba(0,0,0,0.05);
+  display:flex;flex-direction:column;position:relative;}
+@media(max-width:430px){body{padding:0;background:var(--bg);}.phone{width:100vw;height:100vh;border-radius:0;box-shadow:none;}}
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.screen.active{display:flex;}
+.sc{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+.sc::-webkit-scrollbar{display:none;}
+
+/* ステータスバー */
+.sb{background:var(--card);padding:13px 22px 8px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+
+/* ボトムナビ */
+.nav{background:var(--card);border-top:1px solid var(--line);padding:8px 0 18px;display:flex;justify-content:space-around;flex-shrink:0;}
+.nb{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:4px 20px;transition:opacity .15s;}
+.nb svg{width:22px;height:22px;transition:stroke .2s;}
+.nb span{font-size:10px;font-weight:500;transition:color .2s;}
+.nb.on.g svg{stroke:var(--green);}  .nb.on.g span{color:var(--green);}
+.nb.on.a svg{stroke:var(--amber);}  .nb.on.a span{color:var(--amber);}
+.nb.on.r svg{stroke:var(--rose);}   .nb.on.r span{color:var(--rose);}
+.nb:not(.on) svg{stroke:var(--mute);} .nb:not(.on) span{color:var(--mute);}
+
+/* FAB */
+.fab{position:absolute;right:20px;bottom:78px;width:52px;height:52px;border-radius:50%;
+  background:var(--rose);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 18px rgba(184,80,104,.4);transition:transform .15s;z-index:20;}
+.fab:active{transform:scale(.92);}
+
+/* ===== ホーム ===== */
+.hd{background:var(--card);padding:12px 20px 14px;border-bottom:1px solid var(--line);flex-shrink:0;}
+.hd-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.logo{font-family:'Zen Kaku Gothic New',sans-serif;font-size:22px;font-weight:900;color:var(--green);}
+.kid-pill{display:flex;align-items:center;gap:7px;background:var(--rbg);border-radius:20px;padding:6px 12px;border:1px solid rgba(184,80,104,.15);}
+.kid-av{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--rose),#E8856E);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;}
+.kid-nm{font-size:12px;font-weight:600;color:var(--rose);}
+.kid-age{font-size:10px;color:rgba(184,80,104,.6);}
+
+/* 問いかけカード */
+.greet-card{background:var(--card);border-radius:16px;border:1px solid var(--line);padding:14px 16px;margin-bottom:14px;}
+.greet-txt{font-size:13px;color:var(--mid);line-height:1.7;margin-bottom:12px;}
+.greet-txt strong{color:var(--ink);font-weight:500;}
+.inp-pair{display:flex;flex-direction:column;gap:6px;}
+.inp-row-2{display:flex;gap:8px;align-items:flex-end;}
+.ti{flex:1;background:var(--bg);border:1.5px solid var(--line);border-radius:12px;
+  padding:9px 12px;font-size:13px;color:var(--ink);
+  font-family:'Noto Sans JP',sans-serif;font-weight:300;
+  resize:none;line-height:1.5;overflow:hidden;height:38px;
+  transition:border-color .2s,background .2s;}
+.ti:focus{outline:none;border-color:var(--green);background:var(--card);}
+.ti::placeholder{color:var(--mute);}
+.log-btn{width:38px;height:38px;border-radius:11px;background:var(--green);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  box-shadow:0 2px 8px rgba(42,96,73,.25);transition:transform .15s,background .15s;}
+.log-btn:active{transform:scale(.9);background:var(--gl);}
+
+/* 視点チェンジ返答 */
+.rf-reply{background:linear-gradient(135deg,var(--gbg),rgba(42,96,73,.03));
+  border-radius:12px;border:1px solid rgba(42,96,73,.2);
+  padding:12px 14px;margin-bottom:14px;}
+.rf-lbl{display:flex;align-items:center;gap:5px;margin-bottom:7px;}
+.rf-dot{width:6px;height:6px;border-radius:50%;background:var(--green);}
+.rf-lbl-txt{font-size:10px;font-weight:600;color:var(--green);letter-spacing:.05em;}
+.rf-msg{font-size:13px;color:var(--mid);line-height:1.7;margin-bottom:10px;}
+.rf-reframe{font-size:13px;color:var(--ink);line-height:1.75;font-weight:300;}
+.rf-reframe strong{color:var(--green);font-weight:500;}
+.rf-exp{background:white;border-radius:8px;padding:9px 11px;margin-top:9px;}
+.rf-exp-lbl{font-size:10px;font-weight:600;color:var(--mute);letter-spacing:.05em;margin-bottom:5px;}
+.rf-exp-txt{font-size:12px;color:var(--mid);font-style:italic;line-height:1.65;margin-bottom:4px;}
+.rf-exp-who{font-size:10px;color:var(--mute);}
+
+/* グラフ */
+.graph-card{background:var(--card);border-radius:16px;border:1px solid var(--line);padding:14px 16px;margin-bottom:14px;}
+.gc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.gc-title{font-size:13px;font-weight:600;color:var(--ink);}
+.gc-sub{font-size:11px;color:var(--mute);}
+.graph-bars{height:72px;display:flex;align-items:flex-end;gap:6px;padding:0 2px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.bar-bg{width:100%;background:var(--line);border-radius:4px;height:52px;overflow:hidden;cursor:pointer;position:relative;}
+.bar-fill{position:absolute;bottom:0;width:100%;border-radius:4px;transition:height .7s cubic-bezier(.34,1.2,.64,1);}
+.bar-day{font-size:9px;color:var(--mute);}
+
+/* はなちゃん今日のカード */
+.today-card{background:linear-gradient(135deg,var(--green),var(--gl));border-radius:18px;padding:16px 18px;margin-bottom:14px;position:relative;overflow:hidden;}
+.today-card::before{content:'';position:absolute;top:-20px;right:-20px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.06);}
+.tc-tag{font-size:10px;color:rgba(255,255,255,.7);margin-bottom:6px;font-weight:500;letter-spacing:.05em;}
+.tc-title{font-family:'Zen Kaku Gothic New',sans-serif;font-size:17px;font-weight:700;color:white;line-height:1.45;margin-bottom:8px;}
+.tc-body{font-size:12px;color:rgba(255,255,255,.85);line-height:1.7;font-weight:300;}
+.tc-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}
+.tc-chip{background:rgba(255,255,255,.15);border-radius:16px;padding:4px 10px;font-size:11px;color:rgba(255,255,255,.9);}
+
+/* 横スクロール */
+.h-scroll{display:flex;gap:10px;overflow-x:auto;margin:0 -20px;padding:0 20px 6px;}
+.h-scroll::-webkit-scrollbar{display:none;}
+.rc{background:var(--card);border-radius:14px;border:1px solid var(--line);padding:12px;flex-shrink:0;width:148px;cursor:pointer;transition:transform .1s,border-color .15s;}
+.rc:active{transform:scale(.97);border-color:rgba(42,96,73,.25);}
+.rc-em{font-size:26px;margin-bottom:7px;}
+.rc-badge{font-size:9px;font-weight:600;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:5px;}
+.b-g{background:var(--gbg);color:var(--green);}
+.b-b{background:rgba(58,110,168,.08);color:#3A6EA8;}
+.b-r{background:var(--rbg);color:var(--rose);}
+.b-a{background:var(--abg);color:var(--amber);}
+.rc-title{font-size:12px;font-weight:500;color:var(--ink);}
+.rc-sub{font-size:11px;color:var(--mute);margin-top:3px;line-height:1.4;}
+
+/* タイムライン */
+.tl-wrap{background:var(--card);border-radius:14px;border:1px solid var(--line);padding:14px;}
+.tl-item{display:flex;gap:10px;align-items:flex-start;}
+.tl-lw{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+.tl-dot{width:10px;height:10px;border-radius:50%;margin-top:3px;}
+.tl-line{width:1px;background:var(--line);margin-top:4px;flex:1;min-height:16px;}
+.tl-txt{font-size:12px;color:var(--ink);line-height:1.5;margin-bottom:3px;}
+.tl-rf{font-size:11px;color:var(--green);}
+.tl-date{font-size:10px;color:var(--mute);margin-top:2px;}
+.sep{border-bottom:1px solid var(--line);margin:10px 0;}
+
+/* 手紙カード */
+.letter{background:linear-gradient(135deg,var(--rbg),rgba(184,80,104,.03));border-radius:14px;border:1px solid rgba(184,80,104,.15);padding:14px;margin-bottom:4px;}
+.letter-head{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+.letter-body{background:white;border-radius:8px;padding:10px;margin-bottom:8px;}
+.letter-txt{font-size:12px;color:var(--mid);line-height:1.6;font-style:italic;margin-bottom:3px;}
+.letter-from{font-size:10px;color:var(--mute);}
+.letter-cta{font-size:12px;color:var(--rose);font-weight:500;}
+
+/* セクションラベル */
+.slbl{font-size:11px;font-weight:600;color:var(--mute);letter-spacing:.08em;margin-bottom:10px;}
+
+/* ===== 調べる ===== */
+.sh-hd{background:var(--card);padding:10px 16px 0;border-bottom:1px solid var(--line);flex-shrink:0;}
+.sh-wrap{position:relative;margin-bottom:8px;}
+.sh-inp{width:100%;background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:12px 48px 12px 16px;font-size:15px;color:var(--ink);font-family:'Noto Sans JP',sans-serif;font-weight:300;resize:none;line-height:1.5;height:48px;overflow:hidden;transition:border-color .2s,background .2s;}
+.sh-inp::placeholder{color:var(--mute);}
+.sh-inp:focus{outline:none;border-color:var(--green);background:var(--card);height:auto;min-height:48px;}
+.sh-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:9px;background:var(--green);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s;}
+.sh-btn:active{transform:translateY(-50%) scale(.88);}
+.qtags{display:flex;gap:5px;overflow-x:auto;padding:0 0 10px;}
+.qtags::-webkit-scrollbar{display:none;}
+.qt{flex-shrink:0;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:6px 13px;font-size:12px;color:var(--mid);cursor:pointer;white-space:nowrap;font-family:'Noto Sans JP',sans-serif;transition:all .15s;}
+.qt:active{background:var(--gbg);border-color:rgba(42,96,73,.25);color:var(--green);}
+
+.rpad{padding:14px 16px 28px;}
+.rq{font-family:'Zen Kaku Gothic New',sans-serif;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:4px;line-height:1.4;}
+.rmeta{font-size:11px;color:var(--mute);margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.rbadge{display:inline-flex;align-items:center;gap:4px;background:var(--rbg);border-radius:12px;padding:3px 9px;font-size:10px;color:var(--rose);font-weight:500;}
+.ai-ans{background:var(--green);border-radius:14px;padding:14px 16px;margin-bottom:14px;}
+.aa-lbl{font-size:10px;color:rgba(255,255,255,.65);font-weight:500;letter-spacing:.06em;margin-bottom:7px;}
+.aa-title{font-family:'Zen Kaku Gothic New',sans-serif;font-size:15px;font-weight:700;color:white;margin-bottom:8px;line-height:1.45;}
+.aa-body{font-size:12px;color:rgba(255,255,255,.85);line-height:1.75;font-weight:300;}
+.aa-p{background:rgba(255,255,255,.1);border-radius:8px;padding:8px 10px;margin-top:10px;font-size:12px;color:rgba(255,255,255,.95);line-height:1.6;}
+.aa-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}
+.aa-chip{background:rgba(255,255,255,.15);border-radius:16px;padding:4px 10px;font-size:11px;color:rgba(255,255,255,.9);}
+.rsec{font-size:11px;font-weight:600;color:var(--mute);letter-spacing:.08em;margin-bottom:10px;}
+.try-item{background:var(--card);border-radius:12px;border:1px solid var(--line);padding:12px 14px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;}
+.try-n{width:22px;height:22px;border-radius:50%;background:var(--amber);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.try-ttl{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:3px;line-height:1.4;}
+.try-desc{font-size:12px;color:var(--mid);line-height:1.6;}
+.try-p{font-size:11px;color:var(--rose);margin-top:5px;padding:4px 8px;background:var(--rbg);border-radius:6px;}
+.try-c{font-size:11px;color:var(--amber);margin-top:5px;font-weight:500;}
+.exp-card2{background:var(--card);border-radius:12px;border:1px solid var(--line);padding:13px 14px;margin-bottom:8px;}
+.ec-who{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+.ec-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:9px;font-weight:700;flex-shrink:0;}
+.ec-nm{font-size:11px;font-weight:600;color:var(--ink);}
+.ec-age{font-size:10px;color:var(--mute);}
+.ec-txt{font-size:13px;color:var(--ink);line-height:1.75;font-weight:300;margin-bottom:9px;}
+.ec-after{background:var(--bg);border-radius:8px;padding:8px 10px;margin-bottom:9px;display:flex;gap:6px;}
+.ec-al{font-size:10px;font-weight:600;color:var(--amber);flex-shrink:0;margin-top:1px;}
+.ec-at{font-size:12px;color:var(--mid);line-height:1.5;}
+.wk{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:18px;background:var(--bg);border:1px solid var(--line);font-size:11px;color:var(--mute);cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .2s;}
+.wk.on{background:var(--abg);border-color:rgba(212,112,10,.3);color:var(--amber);}
+.wk.on svg{fill:var(--amber);stroke:var(--amber);}
+@keyframes hp{0%{transform:scale(1)}35%{transform:scale(1.5)}70%{transform:scale(.9)}100%{transform:scale(1)}}
+.hp{animation:hp .3s ease;}
+.pw{background:var(--card);border-radius:14px;border:1px solid var(--line);overflow:hidden;margin-top:4px;}
+.pw-blur{padding:13px 14px;filter:blur(4px);pointer-events:none;opacity:.4;}
+.pw-cta{background:linear-gradient(135deg,var(--green),var(--gl));padding:16px;text-align:center;}
+.pw-ttl{font-family:'Zen Kaku Gothic New',sans-serif;font-size:14px;font-weight:700;color:white;margin-bottom:4px;}
+.pw-sub{font-size:11px;color:rgba(255,255,255,.75);margin-bottom:12px;}
+.pw-btn{background:white;color:var(--green);font-size:13px;font-weight:700;padding:10px 24px;border-radius:24px;border:none;cursor:pointer;font-family:'Zen Kaku Gothic New',sans-serif;transition:transform .15s;}
+.pw-btn:active{transform:scale(.96);}
+
+/* ===== 話す ===== */
+.tk-hd{background:var(--card);padding:12px 20px 14px;border-bottom:1px solid var(--line);flex-shrink:0;}
+.tk-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.tk-logo{font-family:'Zen Kaku Gothic New',sans-serif;font-size:22px;font-weight:900;color:var(--rose);}
+.live-pill{display:flex;align-items:center;gap:6px;background:var(--rbg);border-radius:20px;padding:5px 11px;border:1px solid rgba(184,80,104,.15);}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--rose);animation:lp 2s ease-in-out infinite;}
+@keyframes lp{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.2)}}
+.live-txt{font-size:11px;color:var(--rose);font-weight:500;}
+.mood-row{display:flex;gap:6px;}
+.mood-btn{flex:1;padding:8px 4px;border-radius:12px;background:var(--bg);border:1.5px solid var(--line);cursor:pointer;text-align:center;transition:all .15s;font-family:'Noto Sans JP',sans-serif;}
+.mood-btn:active,.mood-btn.sel{background:var(--rbg);border-color:rgba(184,80,104,.35);}
+.mood-em{font-size:20px;display:block;margin-bottom:2px;}
+.mood-lbl{font-size:10px;color:var(--mute);}
+.mood-btn.sel .mood-lbl{color:var(--rose);font-weight:500;}
+
+.chat-feed{padding:16px 16px 8px;display:flex;flex-direction:column;gap:14px;}
+.ab{display:flex;gap:10px;align-items:flex-start;}
+.av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--rose),#D4756A);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:2px;box-shadow:0 2px 8px rgba(184,80,104,.2);}
+.am{background:var(--card);border-radius:4px 16px 16px 16px;border:1px solid var(--line);padding:12px 14px;font-size:13px;color:var(--ink);line-height:1.75;font-weight:300;max-width:84%;}
+.ub{align-self:flex-end;max-width:82%;}
+.um{background:var(--rose);color:white;border-radius:16px 16px 4px 16px;padding:12px 14px;font-size:13px;line-height:1.7;font-weight:300;box-shadow:0 2px 10px rgba(184,80,104,.25);}
+.ut{font-size:10px;color:var(--mute);text-align:right;margin-top:4px;padding-right:2px;}
+.recv-card{background:var(--card);border-radius:14px;border:1px solid var(--line);padding:12px 14px;max-width:84%;}
+.recv-top{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+.recv-dot{width:8px;height:8px;border-radius:50%;background:var(--rose);box-shadow:0 0 0 3px rgba(184,80,104,.15);}
+.recv-lbl{font-size:10px;font-weight:600;color:var(--rose);}
+.recv-cnt{font-size:10px;color:var(--mute);}
+.recv-num{font-family:'Zen Kaku Gothic New',sans-serif;font-size:32px;font-weight:900;color:var(--rose);line-height:1;margin-bottom:2px;}
+.recv-sub{font-size:12px;color:var(--mid);line-height:1.6;}
+.warm-card{background:var(--card);border-radius:4px 16px 16px 16px;border:1px solid var(--line);padding:12px 14px;font-size:13px;color:var(--ink);line-height:1.8;font-weight:300;max-width:84%;}
+.warm-card strong{color:var(--rose);font-weight:500;}
+.talk-exp{background:var(--card);border-radius:14px;border:1px solid var(--line);padding:13px 14px;max-width:90%;}
+.te-top{display:flex;align-items:center;gap:7px;margin-bottom:9px;}
+.te-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:9px;font-weight:700;flex-shrink:0;}
+.te-who{font-size:11px;color:var(--mute);}
+.te-txt{font-size:13px;color:var(--ink);line-height:1.75;font-weight:300;margin-bottom:9px;}
+.te-after{background:var(--bg);border-radius:8px;padding:8px 10px;display:flex;gap:6px;align-items:flex-start;margin-bottom:9px;}
+.te-al{font-size:10px;font-weight:600;color:var(--amber);flex-shrink:0;margin-top:1px;}
+.te-at{font-size:12px;color:var(--mid);line-height:1.5;}
+.suggest-s{background:linear-gradient(135deg,var(--gbg),rgba(42,96,73,.04));border-radius:12px;border:1px solid rgba(42,96,73,.18);padding:11px 13px;max-width:84%;}
+.ss-lbl{font-size:10px;font-weight:600;color:var(--green);margin-bottom:5px;}
+.ss-btn{background:var(--green);color:white;font-size:11px;font-weight:600;padding:6px 14px;border-radius:16px;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;margin-top:6px;display:inline-block;transition:background .15s;}
+.ss-btn:active{background:var(--gl);}
+
+@keyframes ld{0%,80%,100%{transform:scale(0);opacity:.3}40%{transform:scale(1);opacity:1}}
+.ldd{width:7px;height:7px;border-radius:50%;background:var(--rose);animation:ld 1.2s ease-in-out infinite;display:inline-block;}
+.ldd:nth-child(2){animation-delay:.16s;}.ldd:nth-child(3){animation-delay:.32s;}
+@keyframes ldd2{0%,80%,100%{transform:scale(0);opacity:.3}40%{transform:scale(1);opacity:1}}
+.ldg{width:7px;height:7px;border-radius:50%;background:var(--green);animation:ldd2 1.2s ease-in-out infinite;display:inline-block;}
+.ldg:nth-child(2){animation-delay:.16s;}.ldg:nth-child(3){animation-delay:.32s;}
+
+.tk-inp{background:var(--card);border-top:1px solid var(--line);padding:10px 16px 20px;flex-shrink:0;}
+.stags{display:flex;gap:5px;overflow-x:auto;padding-bottom:8px;}
+.stags::-webkit-scrollbar{display:none;}
+.stag{flex-shrink:0;background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:11px;color:var(--mid);cursor:pointer;white-space:nowrap;font-family:'Noto Sans JP',sans-serif;transition:all .15s;}
+.stag:active{background:var(--rbg);border-color:rgba(184,80,104,.3);color:var(--rose);}
+.chat-row{display:flex;gap:8px;align-items:flex-end;}
+.chat-ta{flex:1;background:var(--bg);border:2px solid var(--line);border-radius:20px;padding:11px 16px;font-size:14px;color:var(--ink);resize:none;line-height:1.5;max-height:90px;font-family:'Noto Sans JP',sans-serif;font-weight:300;overflow-y:auto;transition:border-color .2s;}
+.chat-ta::placeholder{color:var(--mute);}
+.chat-ta:focus{outline:none;border-color:var(--rose);}
+.send-btn{width:44px;height:44px;border-radius:50%;background:var(--rose);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 14px rgba(184,80,104,.35);transition:transform .15s;}
+.send-btn:active{transform:scale(.9);}
+
+/* 課金モーダル */
+.pay-ov{display:none;position:absolute;inset:0;background:rgba(26,23,20,.5);z-index:200;align-items:flex-end;backdrop-filter:blur(4px);}
+.pay-ov.show{display:flex;}
+.pay-sh{width:100%;background:var(--card);border-radius:26px 26px 0 0;padding:10px 22px 38px;animation:su .3s cubic-bezier(.34,1.2,.64,1);border-top:1px solid var(--line);}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.pay-hdl{width:36px;height:4px;background:var(--line);border-radius:2px;margin:0 auto 22px;}
+.pay-ttl{font-family:'Zen Kaku Gothic New',sans-serif;font-size:22px;font-weight:900;color:var(--green);margin-bottom:6px;}
+.pay-sub{font-size:13px;color:var(--mid);line-height:1.7;margin-bottom:20px;}
+.pay-row{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}
+.pay-ico{width:40px;height:40px;border-radius:12px;background:var(--gbg);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.pay-ft{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:2px;}
+.pay-fd{font-size:11px;color:var(--mute);line-height:1.5;}
+.pay-cta{width:100%;padding:16px;border-radius:14px;background:var(--green);color:white;font-size:16px;font-weight:700;border:none;cursor:pointer;font-family:'Zen Kaku Gothic New',sans-serif;margin-top:8px;margin-bottom:10px;transition:background .15s;}
+.pay-cta:active{background:var(--gl);}
+.pay-note{font-size:11px;color:var(--mute);text-align:center;}
+
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fu .4s ease forwards;}
+.fu2{animation:fu .4s .08s ease forwards;opacity:0;}
+.fu3{animation:fu .4s .16s ease forwards;opacity:0;}
+@keyframes si{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.si{animation:si .35s ease forwards;}
+</style>
+</head>
+<body>
+<div class="phone">
+<div class="sb">
+  <span style="font-size:13px;font-weight:500;color:#A8A29E;">9:41</span>
+  <div style="display:flex;gap:5px;align-items:center;">
+    <svg width="14" height="14" fill="none" stroke="#C8C0B8" stroke-width="2" viewBox="0 0 24 24"><path d="M1.5 8.5a13 13 0 0121 0M5 12a10 10 0 0114 0M8.5 15.5a6 6 0 017 0M12 19h.01"/></svg>
+    <svg width="20" height="11" viewBox="0 0 20 11"><rect x="0" y="1" width="16" height="9" rx="2" fill="none" stroke="#C8C0B8" stroke-width="1.5"/><rect x="1.5" y="2.5" width="10" height="6" rx="1" fill="#C8C0B8"/><path d="M17 4v3a1.5 1.5 0 000-3z" fill="#C8C0B8"/></svg>
+  </div>
+</div>
+
+<!-- ====== ホーム ====== -->
+<div class="screen active" id="sc-home">
+  <div class="hd">
+    <div class="hd-top" style="margin-bottom:0;">
+      <div class="logo">ははとも</div>
+      <div class="kid-pill">
+        <div class="kid-av">🌸</div>
+        <div><div class="kid-nm">はなちゃん</div><div class="kid-age">生後3ヶ月・女の子</div></div>
+      </div>
+    </div>
+    <!-- ホーム内タブ -->
+    <div style="display:flex;gap:0;margin-top:12px;background:var(--bg);border-radius:12px;padding:3px;">
+      <button id="htab-hana" onclick="switchHTab('hana')" style="flex:1;padding:8px 0;border-radius:9px;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:600;background:var(--green);color:white;transition:all .2s;">🌱 はなちゃん</button>
+      <button id="htab-me" onclick="switchHTab('me')" style="flex:1;padding:8px 0;border-radius:9px;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:500;background:transparent;color:var(--mute);transition:all .2s;">🌸 わたし</button>
+    </div>
+  </div>
+
+  <!-- はなちゃんタブ -->
+  <div class="sc" style="padding:14px 20px 24px;" id="htab-hana-sc">
+
+    <!-- ① はなちゃんの記録から（大・上部・主役） -->
+    <div style="font-size:10px;font-weight:600;color:var(--green);letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:5px;">
+      <div style="width:5px;height:5px;border-radius:50%;background:var(--green);"></div>
+      はなちゃんの記録から
+    </div>
+    <div class="today-card" style="margin-bottom:6px;">
+      <div class="tc-tag">今日のはなちゃん · 生後3ヶ月</div>
+      <div class="tc-title" id="tc-title">追視が出てきたはなちゃん。<br>動くものを見せてあげましょう</div>
+      <div class="tc-body" id="tc-body">はなちゃんは先週から動くものを目で追うようになりました。顔の近くでゆっくり動かすと夢中になるはず。外の音が苦手なこの子には、静かな室内で試してみてください。</div>
+      <div class="tc-chips">
+        <span class="tc-chip">👀 追視の記録から</span>
+        <span class="tc-chip">👂 音に敏感な子向け</span>
+      </div>
+    </div>
+
+    <!-- 変化の可視化（記録から・コンパクト） -->
+    <div style="background:var(--card);border-radius:14px;border:1px solid rgba(42,96,73,.2);padding:12px 14px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:11px;font-weight:600;color:var(--green);">🌱 先週から変わったこと</span>
+        <span style="font-size:10px;color:var(--mute);">記録から自動集計</span>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <div style="flex:1;background:var(--gbg);border-radius:10px;padding:8px 10px;text-align:center;">
+          <div style="font-size:10px;color:var(--mute);margin-bottom:3px;">😴 夜泣き</div>
+          <div style="font-size:11px;color:var(--mute);text-decoration:line-through;">3回</div>
+          <div style="font-size:16px;font-weight:700;color:var(--green);">1回</div>
+        </div>
+        <div style="flex:1;background:rgba(212,112,10,.08);border-radius:10px;padding:8px 10px;text-align:center;">
+          <div style="font-size:10px;color:var(--mute);margin-bottom:3px;">😊 笑顔</div>
+          <div style="font-size:11px;color:var(--mute);text-decoration:line-through;">2回</div>
+          <div style="font-size:16px;font-weight:700;color:var(--amber);">5回</div>
+        </div>
+        <div style="flex:1;background:rgba(138,166,138,.12);border-radius:10px;padding:8px 10px;text-align:center;">
+          <div style="font-size:10px;color:var(--mute);margin-bottom:3px;">🍜 食事</div>
+          <div style="font-size:11px;color:var(--mute);text-decoration:line-through;">半分</div>
+          <div style="font-size:16px;font-weight:700;color:var(--sage);">完食</div>
+        </div>
+      </div>
+      <div style="margin-top:9px;font-size:12px;color:var(--green);font-weight:500;">はなちゃん、少し変わってきましたね。</div>
+    </div>
+
+    <!-- ② はなちゃんの記録から選んだおすすめ -->
+    <div style="font-size:10px;font-weight:600;color:var(--green);letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:5px;">
+      <div style="width:5px;height:5px;border-radius:50%;background:var(--green);"></div>
+      はなちゃんの記録から選びました
+    </div>
+    <div class="h-scroll" style="margin:0 -20px;padding-left:20px;margin-bottom:16px;">
+      <div class="rc" onclick="goSearch('追視が出てきた赤ちゃんへのおすすめ遊びは？')">
+        <div class="rc-em">👀</div>
+        <div style="font-size:9px;color:var(--green);margin-bottom:4px;font-weight:600;">追視の記録から</div>
+        <div class="rc-title">追視を使った遊び</div>
+        <div class="rc-sub">はなちゃんの今に合わせた</div>
+      </div>
+      <div class="rc" onclick="goSearch('音に敏感な赤ちゃんの夜泣き対策')">
+        <div class="rc-em">👂</div>
+        <div style="font-size:9px;color:var(--rose);margin-bottom:4px;font-weight:600;">音に敏感な記録から</div>
+        <div class="rc-title">夜泣き対策</div>
+        <div class="rc-sub">はなちゃんに合った方法</div>
+      </div>
+      <div class="rc" onclick="goSearch('うどん好きな赤ちゃんの次の離乳食')">
+        <div class="rc-em">🍜</div>
+        <div style="font-size:9px;color:var(--amber);margin-bottom:4px;font-weight:600;">食事の記録から</div>
+        <div class="rc-title">次の離乳食</div>
+        <div class="rc-sub">うどん好きなこの子向け</div>
+      </div>
+      <div class="rc" onclick="goSearch('生後3ヶ月におすすめの絵本')">
+        <div class="rc-em">📚</div>
+        <div style="font-size:9px;color:var(--mute);margin-bottom:4px;font-weight:600;">生後3ヶ月向け</div>
+        <div class="rc-title">今週の絵本</div>
+        <div class="rc-sub">コントラストが強いものを</div>
+      </div>
+      <div style="width:16px;flex-shrink:0;"></div>
+    </div>
+
+    <!-- ③ はなちゃんの記録（タイムライン） -->
+    <div style="font-size:10px;font-weight:600;color:var(--green);letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:5px;">
+      <div style="width:5px;height:5px;border-radius:50%;background:var(--green);"></div>
+      はなちゃんの記録
+    </div>
+    <div class="tl-wrap">
+      <div id="tl-list">
+        <div class="tl-item">
+          <div class="tl-lw"><div class="tl-dot" style="background:var(--green);"></div><div class="tl-line"></div></div>
+          <div style="flex:1;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:10px;">
+            <div class="tl-txt">うどんをよく食べた。つるっとした食感が好きみたい</div>
+            <div class="tl-rf">食事を届けた事実が残りました</div>
+            <div class="tl-date">今日</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-lw"><div class="tl-dot" style="background:var(--amber);"></div><div class="tl-line"></div></div>
+          <div style="flex:1;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:10px;">
+            <div class="tl-txt">外の音（車の音など）に敏感で驚きやすい</div>
+            <div class="tl-rf">はなちゃんのことをひとつ深く知った日</div>
+            <div class="tl-date">3日前</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-lw"><div class="tl-dot" style="background:var(--sage);"></div></div>
+          <div style="flex:1;">
+            <div class="tl-txt">顔の近くで動くものを目で追うようになった</div>
+            <div class="tl-rf">追視が出てきた。発達が進んでいます</div>
+            <div class="tl-date">1週間前</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="height:24px;"></div>
+  </div>
+
+  <!-- わたしタブ -->
+  <div class="sc" style="padding:14px 20px 24px;display:none;" id="htab-me-sc">
+
+    <!-- ① 今週の感情記録 -->
+    <div class="slbl">今週の記録</div>
+    <div style="background:var(--card);border-radius:16px;border:1px solid var(--line);padding:14px 16px;margin-bottom:14px;">
+      <!-- 感情サマリー -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--line);">
+        <div style="flex:1;">
+          <div style="font-size:12px;color:var(--mid);margin-bottom:6px;">今週よく出てきた気持ち</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;">
+            <span style="font-size:11px;background:var(--rbg);color:var(--rose);padding:3px 10px;border-radius:20px;font-weight:500;">😔 疲れた　5回</span>
+            <span style="font-size:11px;background:var(--rbg);color:var(--rose);padding:3px 10px;border-radius:20px;font-weight:500;">😢 限界　2回</span>
+            <span style="font-size:11px;background:var(--gbg);color:var(--green);padding:3px 10px;border-radius:20px;font-weight:500;">😊 嬉しい　1回</span>
+          </div>
+        </div>
+      </div>
+      <!-- 日別タイムライン -->
+      <div style="display:flex;flex-direction:column;gap:0;" id="emotion-log">
+        <div style="display:flex;align-items:flex-start;gap:10px;padding-bottom:10px;">
+          <div style="font-size:11px;color:var(--mute);width:20px;flex-shrink:0;margin-top:2px;">月</div>
+          <div style="width:20px;text-align:center;flex-shrink:0;">😔</div>
+          <div style="flex:1;">
+            <div style="font-size:12px;color:var(--ink);line-height:1.5;">夜泣きが続いてる。昨夜も3時間しか寝れなかった</div>
+            <div style="font-size:11px;color:var(--green);margin-top:2px;">眠れなかった夜も、はなちゃんの隣にいた</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;padding-bottom:10px;">
+          <div style="font-size:11px;color:var(--mute);width:20px;flex-shrink:0;margin-top:2px;">火</div>
+          <div style="width:20px;text-align:center;flex-shrink:0;">😟</div>
+          <div style="flex:1;">
+            <div style="font-size:12px;color:var(--ink);line-height:1.5;">ベビーフードに頼ってしまった</div>
+            <div style="font-size:11px;color:var(--green);margin-top:2px;">今日もはなちゃんの食事を届けた</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;padding-bottom:10px;">
+          <div style="font-size:11px;color:var(--mute);width:20px;flex-shrink:0;margin-top:2px;">水</div>
+          <div style="width:20px;text-align:center;flex-shrink:0;">😊</div>
+          <div style="flex:1;">
+            <div style="font-size:12px;color:var(--ink);line-height:1.5;">はなちゃんが笑ってくれた</div>
+            <div style="font-size:11px;color:var(--green);margin-top:2px;">その笑顔を引き出したのはあなたです</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;padding-bottom:10px;">
+          <div style="font-size:11px;color:var(--mute);width:20px;flex-shrink:0;margin-top:2px;">木</div>
+          <div style="width:20px;text-align:center;flex-shrink:0;color:var(--line);">—</div>
+          <div style="flex:1;"><div style="font-size:12px;color:var(--mute);">記録なし</div></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;padding-bottom:10px;">
+          <div style="font-size:11px;color:var(--mute);width:20px;flex-shrink:0;margin-top:2px;">金</div>
+          <div style="width:20px;text-align:center;flex-shrink:0;">😢</div>
+          <div style="flex:1;">
+            <div style="font-size:12px;color:var(--ink);line-height:1.5;">もう限界かも。疲れた</div>
+            <div style="font-size:11px;color:var(--green);margin-top:2px;">疲れを感じるのは、それだけ全力でいた証拠</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;padding-bottom:10px;">
+          <div style="font-size:11px;color:var(--mute);width:20px;flex-shrink:0;margin-top:2px;">土</div>
+          <div style="width:20px;text-align:center;flex-shrink:0;">😐</div>
+          <div style="flex:1;">
+            <div style="font-size:12px;color:var(--ink);line-height:1.5;">少し眠れた。まあまあかな</div>
+            <div style="font-size:11px;color:var(--green);margin-top:2px;">今日もここに来てくれてありがとう</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <div style="font-size:11px;color:var(--rose);font-weight:600;width:20px;flex-shrink:0;margin-top:2px;">今日</div>
+          <div style="width:20px;text-align:center;flex-shrink:0;color:var(--line);">—</div>
+          <div style="flex:1;"><div style="font-size:12px;color:var(--mute);">まだ記録がありません</div></div>
+        </div>
+      </div>
+      <!-- 振り返りコメント -->
+      <div style="margin-top:12px;padding:10px 12px;background:var(--gbg);border-radius:10px;border-left:3px solid var(--green);">
+        <div style="font-size:12px;color:var(--green);font-weight:500;margin-bottom:3px;">今週のあなた</div>
+        <div style="font-size:12px;color:var(--mid);line-height:1.65;font-weight:300;">しんどい日が続いていますが、水曜日にはなちゃんの笑顔を見つけていましたね。しんどい日だけではなかった。</div>
+      </div>
+    </div>
+
+    <!-- ② 1週間グラフ -->
+    <div class="slbl">気分のグラフ</div>
+    <div class="graph-card" style="margin-bottom:14px;">
+      <div class="gc-top">
+        <span class="gc-title">あなたの1週間</span>
+        <span class="gc-sub" id="gc-sub">話すタブに記録するとグラフに反映されます</span>
+      </div>
+      <div class="graph-bars" id="graph-bars"></div>
+    </div>
+
+    <!-- ③ 産後うつチェック -->
+    <div class="slbl">状態を確認する</div>
+    <div style="background:var(--card);border-radius:16px;border:1px solid var(--line);padding:14px 16px;margin-bottom:14px;" id="epds-section">
+      <div style="font-size:13px;color:var(--ink);font-weight:500;margin-bottom:6px;">産後うつ簡易チェック（EPDS）</div>
+      <div style="font-size:12px;color:var(--mid);line-height:1.65;margin-bottom:12px;">10問・5分以内。診断ではなく、専門家に相談するきっかけとして使ってください。</div>
+      <div id="epds-result-area" style="display:none;margin-bottom:10px;"></div>
+      <button onclick="openEpds()" id="epds-btn" style="width:100%;padding:12px;border-radius:12px;background:var(--green);color:white;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:background .15s;">チェックしてみる</button>
+    </div>
+
+    <!-- ④ 3ヶ月前との比較 -->
+    <div class="slbl">3ヶ月前のあなたと今</div>
+    <div style="background:var(--card);border-radius:16px;border:1px solid var(--line);padding:14px 16px;margin-bottom:14px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div style="background:var(--bg);border-radius:10px;padding:10px 12px;">
+          <div style="font-size:10px;color:var(--mute);margin-bottom:5px;font-weight:500;">生後0ヶ月の頃</div>
+          <div style="font-size:12px;color:var(--mid);line-height:1.6;font-style:italic;">「夜泣きで3時間しか寝れない。もう限界...」</div>
+          <div style="display:flex;gap:3px;margin-top:6px;flex-wrap:wrap;">
+            <span style="font-size:10px;background:rgba(184,80,104,.1);color:var(--rose);padding:2px 7px;border-radius:10px;">夜泣き</span>
+            <span style="font-size:10px;background:rgba(184,80,104,.1);color:var(--rose);padding:2px 7px;border-radius:10px;">限界</span>
+          </div>
+        </div>
+        <div style="background:var(--gbg);border-radius:10px;padding:10px 12px;border:1px solid rgba(42,96,73,.15);">
+          <div style="font-size:10px;color:var(--green);margin-bottom:5px;font-weight:500;">今のあなた</div>
+          <div style="font-size:12px;color:var(--ink);line-height:1.6;">夜泣きが週1回に。はなちゃんの笑顔が増えた。</div>
+          <div style="display:flex;gap:3px;margin-top:6px;flex-wrap:wrap;">
+            <span style="font-size:10px;background:var(--gbg);color:var(--green);padding:2px 7px;border-radius:10px;">夜泣き減少</span>
+            <span style="font-size:10px;background:var(--gbg);color:var(--green);padding:2px 7px;border-radius:10px;">笑顔</span>
+          </div>
+        </div>
+      </div>
+      <div style="background:linear-gradient(135deg,rgba(212,112,10,.08),rgba(212,112,10,.03));border-radius:10px;padding:10px 12px;border-left:3px solid var(--amber);">
+        <div style="font-size:12px;color:var(--amber);font-weight:500;margin-bottom:3px;">あの頃より、ちゃんと変わっています</div>
+        <div style="font-size:12px;color:var(--mid);line-height:1.65;font-weight:300;">しんどかった時期を乗り越えてきた証拠が、ここに記録されています。</div>
+      </div>
+    </div>
+
+    <!-- ⑤ 3ヶ月前からの手紙 -->
+    <div class="letter">
+      <div class="letter-head">
+        <span style="font-size:16px;">💌</span>
+        <span style="font-size:11px;font-weight:600;color:var(--rose);">3ヶ月前のあなたから</span>
+        <span style="font-size:10px;color:var(--mute);margin-left:auto;">12月23日</span>
+      </div>
+      <div class="letter-body">
+        <div class="letter-txt">「夜泣きがまだ続いてる。毎晩2〜3時間しか寝れなくて、もうしんどい...」</div>
+        <div class="letter-from">— 生後0ヶ月の時のあなた</div>
+      </div>
+      <div class="letter-cta">あの頃から3ヶ月。今のあなたはどうですか？</div>
+    </div>
+    <div style="height:24px;"></div>
+  </div>
+
+  <!-- FAB → 話す -->
+  <button class="fab" onclick="switchTab('talk')">
+    <svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+  </button>
+</div>
+
+<!-- ====== 調べる ====== -->
+<div class="screen" id="sc-search">
+  <div class="sh-hd">
+    <div class="sh-wrap">
+      <textarea id="sh-ta" class="sh-inp" rows="1" placeholder="はなちゃんのこと、なんでも聞いて" oninput="shAuto(this)" onkeydown="shKey(event)"></textarea>
+      <button class="sh-btn" onclick="doSearch()">
+        <svg width="14" height="14" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+    <div class="qtags">
+      <button class="qt" onclick="setQ('夜泣き対策');doSearch()">😴 夜泣き</button>
+      <button class="qt" onclick="setQ('授乳のやり方');doSearch()">🍼 授乳</button>
+      <button class="qt" onclick="setQ('おすすめの絵本');doSearch()">📚 絵本</button>
+      <button class="qt" onclick="setQ('肌着は何枚必要？');doSearch()">👕 肌着</button>
+      <button class="qt" onclick="setQ('追視が出てきた遊び');doSearch()">👀 追視</button>
+      <button class="qt" onclick="setQ('外出はいつから？');doSearch()">🌿 外出</button>
+    </div>
+  </div>
+  <div class="sc" id="s-sc">
+    <div id="s-empty" style="display:none;padding:28px 20px;text-align:center;">
+      <div style="width:60px;height:60px;border-radius:18px;background:var(--gbg);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px;">🔍</div>
+      <div style="font-family:'Zen Kaku Gothic New',sans-serif;font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px;">はなちゃんのことを調べてみて</div>
+      <div style="font-size:13px;color:var(--mute);line-height:1.7;">記録をもとにパーソナライズした<br>回答が届きます</div>
+    </div>
+    <div id="s-load" style="display:none;padding:40px 20px;text-align:center;">
+      <div style="display:flex;gap:6px;justify-content:center;margin-bottom:12px;"><div class="ldg"></div><div class="ldg"></div><div class="ldg"></div></div>
+      <div style="font-size:12px;color:var(--mute);">はなちゃんの記録をもとに調べています...</div>
+    </div>
+    <div id="s-res" style="display:none;" class="rpad">
+      <div class="rq fu" id="s-rq"></div>
+      <div class="rmeta fu">はなちゃん（生後3ヶ月）の記録をもとにした回答
+        <span class="rbadge" id="s-rbadge" style="display:none;">🌸 <span id="s-rbadge-txt"></span></span>
+      </div>
+      <div class="ai-ans fu2">
+        <div class="aa-lbl">はなちゃんへの回答</div>
+        <div class="aa-title" id="s-title"></div>
+        <div class="aa-body" id="s-body"></div>
+        <div class="aa-p" id="s-personal" style="display:none;"></div>
+        <div class="aa-chips" id="s-chips"></div>
+      </div>
+      <div style="margin-bottom:16px;" class="fu3">
+        <div class="rsec">▶ ためしてみて</div>
+        <div id="s-tries"></div>
+      </div>
+      <div>
+        <div class="rsec">📝 同じ月齢のお母さんの体験談</div>
+        <div id="s-exps"></div>
+        <div class="pw" id="s-pw">
+          <div class="pw-blur"><div style="height:50px;background:var(--bg);border-radius:8px;"></div></div>
+          <div class="pw-cta">
+            <div class="pw-ttl" id="s-pw-ttl"></div>
+            <div class="pw-sub">お母さんが整うと、赤ちゃんも安定します</div>
+            <button class="pw-btn" onclick="openPay()">月額500円で全部読む</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 話す ====== -->
+<div class="screen" id="sc-talk">
+  <!-- ヘッダー：ロゴ＋ライブ表示だけ -->
+  <div class="tk-hd" style="padding:12px 20px 12px;">
+    <div class="tk-row" style="margin-bottom:0;">
+      <div class="tk-logo">ははとも</div>
+      <div class="live-pill"><div class="live-dot"></div><span class="live-txt">今47人が話しています</span></div>
+    </div>
+  </div>
+
+  <!-- チャットフィード -->
+  <div class="sc" id="talk-sc">
+    <div class="chat-feed" id="chat-feed">
+      <div class="ab fu">
+        <div class="av">🌱</div>
+        <div class="am">今日はどうでしたか？<br>しんどかったことも、頑張ったことも、なんでも話してみてください。<br><span style="color:var(--mute);font-size:12px;">ここは誰にも見えません。</span></div>
+      </div>
+      <div class="ub fu2">
+        <div class="um">夜泣きが2週間続いてる。昨夜も3時間しか寝れなかった。もう限界かも...</div>
+        <div class="ut">14:32</div>
+      </div>
+      <div class="ab fu3" style="align-items:flex-start;">
+        <div class="av">🌱</div>
+        <div style="display:flex;flex-direction:column;gap:10px;flex:1;">
+          <div class="recv-card">
+            <div class="recv-top"><div class="recv-dot"></div><span class="recv-lbl">受け取りました</span><span class="recv-cnt">— 今日38人目</span></div>
+            <div class="recv-num">38</div>
+            <div class="recv-sub">人が今日、同じ気持ちを話しました。<br>あなたは一人じゃありません。</div>
+          </div>
+          <div class="warm-card">それはしんどかったですね。<br>3時間しか眠れない夜が2週間。<br><strong>その夜も、はなちゃんの隣にいた。</strong><br>それだけで十分すぎるくらいです。</div>
+          <div class="talk-exp">
+            <div class="te-top"><div class="te-av" style="background:var(--green);">3M</div><span class="te-who">生後3ヶ月・1人目のお母さん</span></div>
+            <div class="te-txt">「夜泣き2週間続いた。でも生後5ヶ月で突然寝るようになった。あの頃の自分に「必ず終わるよ」って言いたい」</div>
+            <div class="te-after"><span class="te-al">今</span><span class="te-at">今は夜ちゃんと寝てる。あの時期が嘘みたい。</span></div>
+            <button class="wk" onclick="wkToggle(this,31)">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+              <span>わかる　31</span>
+            </button>
+          </div>
+          <div class="suggest-s">
+            <div class="ss-lbl">💡 夜泣きの対策を調べてみますか？</div>
+            <div style="font-size:12px;color:var(--mid);">はなちゃんの記録から、音に敏感な子に合った方法が届きます。</div>
+            <button class="ss-btn" onclick="goSearch('音に敏感な赤ちゃんの夜泣き対策')">調べてみる →</button>
+          </div>
+        </div>
+      </div>
+      <div style="height:16px;"></div>
+    </div>
+  </div>
+
+  <!-- 入力エリア：テキスト＋送信 -->
+  <div class="tk-inp" style="padding:12px 16px 20px;">
+    <div class="chat-row">
+      <textarea id="chat-ta" class="chat-ta" rows="1" placeholder="今日どうでしたか？なんでも話して" oninput="taAuto(this)"></textarea>
+      <button class="send-btn" onclick="sendTalk()">
+        <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ボトムナビ -->
+<div class="nav">
+  <button class="nb on g" id="nb-home" onclick="switchTab('home')">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"/></svg>
+    <span>ホーム</span>
+  </button>
+  <button class="nb a" id="nb-search" onclick="switchTab('search')">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35"/></svg>
+    <span>調べる</span>
+  </button>
+  <button class="nb r" id="nb-talk" onclick="switchTab('talk')">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+    <span>話す</span>
+  </button>
+</div>
+
+<!-- EPDSモーダル -->
+<div class="pay-ov" id="epds-ov" onclick="clsEpds(event)">
+  <div class="pay-sh" style="max-height:90vh;overflow-y:auto;">
+    <div class="pay-hdl"></div>
+    <div id="epds-q-area">
+      <div style="font-family:'Zen Kaku Gothic New',sans-serif;font-size:18px;font-weight:900;color:var(--ink);margin-bottom:4px;">今の状態を教えてください</div>
+      <div style="font-size:12px;color:var(--mute);margin-bottom:20px;">過去7日間のことを答えてください。診断ではありません。</div>
+      <div id="epds-questions"></div>
+      <button onclick="calcEpds()" style="width:100%;padding:14px;border-radius:14px;background:var(--green);color:white;font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:'Zen Kaku Gothic New',sans-serif;margin-top:8px;margin-bottom:10px;">結果を見る</button>
+      <button onclick="clsEpdsBtn()" style="width:100%;padding:10px;background:transparent;border:1px solid var(--line);border-radius:12px;color:var(--mute);font-size:13px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;">キャンセル</button>
+    </div>
+    <div id="epds-result" style="display:none;">
+      <div style="font-family:'Zen Kaku Gothic New',sans-serif;font-size:18px;font-weight:900;color:var(--ink);margin-bottom:16px;">チェック結果</div>
+      <div id="epds-score-display"></div>
+      <button onclick="clsEpdsBtn()" style="width:100%;padding:14px;border-radius:14px;background:var(--green);color:white;font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:'Zen Kaku Gothic New',sans-serif;margin-top:16px;">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- 課金モーダル -->
+<div class="pay-ov" id="pay-ov" onclick="clsPay(event)">
+  <div class="pay-sh">
+    <div class="pay-hdl"></div>
+    <div class="pay-ttl">ははとも</div>
+    <div class="pay-sub">育児を記録するほど、正しかったが届き、お母さんのメンタルが整います。</div>
+    <div class="pay-row"><div class="pay-ico">🌸</div><div><div class="pay-ft">はなちゃんへのパーソナライズ回答</div><div class="pay-fd">記録が積み重なるほど精度が上がります</div></div></div>
+    <div class="pay-row"><div class="pay-ico">📖</div><div><div class="pay-ft">体験談が全件・その後も読める</div><div class="pay-fd">同じだったお母さんが今どうなっているか</div></div></div>
+    <div class="pay-row"><div class="pay-ico">💌</div><div><div class="pay-ft">3ヶ月後の自分に今日が届く</div><div class="pay-fd">記録が未来の自分への手紙になります</div></div></div>
+    <button class="pay-cta">月額500円ではじめる</button>
+    <div class="pay-note">いつでも解約できます</div>
+  </div>
+</div>
+
+</div>
+<script>
+// ===== ホーム内タブ切り替え =====
+function switchHTab(name) {
+  var hana = document.getElementById('htab-hana-sc');
+  var me = document.getElementById('htab-me-sc');
+  var btnHana = document.getElementById('htab-hana');
+  var btnMe = document.getElementById('htab-me');
+  if (name === 'hana') {
+    hana.style.display = 'block';
+    me.style.display = 'none';
+    btnHana.style.background = 'var(--green)';
+    btnHana.style.color = 'white';
+    btnHana.style.fontWeight = '600';
+    btnMe.style.background = 'transparent';
+    btnMe.style.color = 'var(--mute)';
+    btnMe.style.fontWeight = '500';
+  } else {
+    hana.style.display = 'none';
+    me.style.display = 'block';
+    btnHana.style.background = 'transparent';
+    btnHana.style.color = 'var(--mute)';
+    btnHana.style.fontWeight = '500';
+    btnMe.style.background = 'var(--rose)';
+    btnMe.style.color = 'white';
+    btnMe.style.fontWeight = '600';
+  }
+}
+
+// ===== タブ切り替え =====
+function switchTab(name) {
+  var screens = document.querySelectorAll('.screen');
+  for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
+  document.getElementById('sc-' + name).classList.add('active');
+  var nbs = document.querySelectorAll('.nb');
+  for (var i = 0; i < nbs.length; i++) nbs[i].classList.remove('on');
+  document.getElementById('nb-' + name).classList.add('on');
+  var fab = document.querySelector('.fab');
+  if (fab) fab.style.display = name === 'home' ? 'flex' : 'none';
+}
+
+// ===== グラフ =====
+var GRAPH_DATA = [
+  { day: '月', val: 60, color: 'var(--amber)' },
+  { day: '火', val: 40, color: 'var(--rose)' },
+  { day: '水', val: 55, color: 'var(--amber)' },
+  { day: '木', val: 70, color: 'var(--sage)' },
+  { day: '金', val: 45, color: 'var(--amber)' },
+  { day: '土', val: 60, color: 'var(--sage)' },
+  { day: '今日', val: 0, color: 'var(--line)' }
+];
+
+function drawGraph() {
+  var area = document.getElementById('graph-bars');
+  if (!area) return;
+  area.innerHTML = '';
+  var maxVal = 0;
+  for (var i = 0; i < GRAPH_DATA.length; i++) {
+    if (GRAPH_DATA[i].val > maxVal) maxVal = GRAPH_DATA[i].val;
+  }
+  if (maxVal === 0) maxVal = 100;
+  for (var i = 0; i < GRAPH_DATA.length; i++) {
+    var d = GRAPH_DATA[i];
+    var col = document.createElement('div');
+    col.className = 'bar-col';
+    var pct = Math.round(d.val / maxVal * 100);
+    col.innerHTML = '<div class="bar-bg"><div class="bar-fill" style="background:' + d.color + ';height:' + pct + '%;"></div></div><div class="bar-day">' + d.day + '</div>';
+    area.appendChild(col);
+  }
+}
+drawGraph();
+setTimeout(function() { if (typeof initSearch === 'function') initSearch(); }, 50);
+
+// ===== テキストエリア自動リサイズ =====
+function tiAuto(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 60) + 'px';
+}
+function taAuto(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 90) + 'px';
+}
+function shAuto(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 80) + 'px';
+}
+
+// ===== 視点チェンジデータ =====
+var RF_DATA = {
+  good: {
+    kw: ['食べた', '飲んだ', '笑った', '寝た', '喜んだ', '好き', '元気', 'いい', '嬉しい', '楽しい'],
+    msg: '今日もよく見ていましたね。',
+    getRF: function(text) {
+      if (text.indexOf('食べ') >= 0 || text.indexOf('飲ん') >= 0)
+        return 'ベビーフードでも手作りでも、<strong>はなちゃんのお腹を満たした</strong>という事実は同じです。今日もちゃんと届けてあげた。';
+      if (text.indexOf('笑') >= 0 || text.indexOf('喜') >= 0)
+        return 'はなちゃんが笑った。<strong>その笑顔を引き出せたのはあなたがそこにいたから</strong>です。';
+      if (text.indexOf('寝') >= 0)
+        return '今日も<strong>はなちゃんが安心して眠れる場所</strong>を作ってあげた。それが今日の育児です。';
+      return '気づいたことを残す。<strong>それ自体がはなちゃんへの深い関わりです。</strong>';
+    },
+    exp: { who: '生後4ヶ月・1人目のお母さん', txt: '「初めて完食した日、なぜか泣きそうになった。毎日ちゃんと食べさせてあげられてるか不安だったから」' }
+  },
+  hard: {
+    kw: ['夜泣き', '寝れない', '泣き止まない', '疲れた', 'しんどい', '辛い', 'つらい', '限界', '泣いた'],
+    msg: 'それはしんどかったですね。ちゃんと伝わっています。',
+    getRF: function(text) {
+      if (text.indexOf('夜泣き') >= 0 || text.indexOf('寝れない') >= 0)
+        return '眠れなかった夜も、<strong>はなちゃんの隣にいた。</strong>その事実は変わりません。';
+      if (text.indexOf('泣き止まない') >= 0 || text.indexOf('泣い') >= 0)
+        return '泣き声の中でそこにいた時間は、<strong>はなちゃんのそばにいた時間</strong>です。逃げなかった。';
+      return '疲れを感じるのは、<strong>それだけ全力でいた証拠</strong>です。手を抜いている人は限界を感じません。';
+    },
+    exp: { who: '生後3ヶ月・1人目のお母さん', txt: '「夜泣き2週間続いた。でも生後5ヶ月で突然寝るようになった。あの頃の自分に「必ず終わるよ」って言いたい」' }
+  },
+  self: {
+    kw: ['ベビーフード', 'レトルト', 'ダメ', 'ごめん', 'できなかった', '罪悪感', '怒った', '怒鳴'],
+    msg: '自分を責めてるんですね。そのくらい必死にやってる証拠です。',
+    getRF: function(text) {
+      if (text.indexOf('ベビーフード') >= 0 || text.indexOf('レトルト') >= 0)
+        return 'ベビーフードを用意した＝<strong>今日もはなちゃんの食事を届けた。</strong>手作りかどうかは方法の違いです。';
+      if (text.indexOf('怒') >= 0)
+        return '感情が出てしまっても、<strong>その後もはなちゃんの隣にいた。</strong>それが大事なことです。';
+      return '「できなかった」と気づいているのは、<strong>ちゃんとはなちゃんを見ているから</strong>です。';
+    },
+    exp: { who: '生後3ヶ月・1人目のお母さん', txt: '「罪悪感ばかり持ってた。でも子どもは親の点数より、そこにいてくれることを求めてると気づいた」' }
+  },
+  def: {
+    kw: [],
+    msg: '記録してくれてありがとう。はなちゃんのことをひとつ深く知った日です。',
+    getRF: function(text) {
+      return '<strong>記録が積み重なるほど、はなちゃんのことが分かってきます。</strong>それがパーソナライズの精度になっていきます。';
+    },
+    exp: { who: '生後5ヶ月・1人目のお母さん', txt: '「記録を続けてたら、子どもの特性が見えてきた。悩みが出た時に「あ、この子はこういう子だから」って考えられるようになった」' }
+  }
+};
+
+function getRFData(text) {
+  var keys = ['good', 'hard', 'self'];
+  for (var i = 0; i < keys.length; i++) {
+    var r = RF_DATA[keys[i]];
+    for (var j = 0; j < r.kw.length; j++) {
+      if (text.indexOf(r.kw[j]) >= 0) return r;
+    }
+  }
+  return RF_DATA.def;
+}
+
+// メッセージカード更新（案C）
+function updateMsg(title, body) {
+  var card = document.querySelector('#htab-hana-sc .msg-card-title');
+  var cardBody = document.querySelector('#htab-hana-sc .msg-card-body');
+  if (card) card.textContent = title;
+  if (cardBody) cardBody.textContent = body;
+}
+
+// ===== 今日の入力 → 記録 =====
+function doLog() {
+  var mood = document.getElementById('mood-inp').value.trim();
+  var baby = document.getElementById('baby-inp').value.trim();
+  if (!mood && !baby) return;
+  var text = (baby || mood);
+
+  // グラフ更新
+  var val = 65;
+  if (mood.indexOf('しんど') >= 0 || mood.indexOf('辛') >= 0 || mood.indexOf('限界') >= 0) val = 25;
+  else if (mood.indexOf('疲れ') >= 0 || mood.indexOf('つら') >= 0) val = 40;
+  else if (mood.indexOf('まあ') >= 0 || mood.indexOf('普通') >= 0) val = 60;
+  else if (mood.indexOf('いい') >= 0 || mood.indexOf('元気') >= 0 || mood.indexOf('嬉しい') >= 0) val = 85;
+  GRAPH_DATA[6].val = val;
+  GRAPH_DATA[6].color = val < 40 ? 'var(--rose)' : val < 60 ? 'var(--amber)' : 'var(--green)';
+  drawGraph();
+  document.getElementById('gc-sub').textContent = '今日の記録が反映されました';
+
+  // はなちゃんカード＋メッセージ更新（案B＋C）
+  if (baby) {
+    if (baby.indexOf('笑') >= 0) {
+      document.getElementById('tc-title').textContent = '笑ったはなちゃん。その笑顔、引き出したのはあなたです';
+      document.getElementById('tc-body').textContent = 'はなちゃんが笑った記録が残りました。外の音には敏感なこの子が、安心して笑えているのはあなたがそこにいるからです。';
+      updateMsg('今日、はなちゃんが笑ってくれたね。', 'その笑顔を引き出したのはあなたがそこにいたから。記録が残りました。');
+    } else if (baby.indexOf('夜泣き') >= 0 || baby.indexOf('泣き止まない') >= 0) {
+      document.getElementById('tc-title').textContent = '夜泣きの続くはなちゃん。でも必ず終わります';
+      document.getElementById('tc-body').textContent = 'はなちゃんは音に敏感なので、外の音が夜泣きのきっかけになっていることがあります。ホワイトノイズが特に合いやすいかもしれません。';
+      updateMsg('夜泣きが続いているね。', '音に敏感なはなちゃんには、ホワイトノイズが特に合いやすいかも。記録しておくと変化が見えてきます。');
+    } else if (baby.indexOf('食べ') >= 0) {
+      document.getElementById('tc-title').textContent = '食べてくれたはなちゃん。今日も届けてあげた';
+      document.getElementById('tc-body').textContent = 'うどんのつるっとした食感が好きなはなちゃん。同じ食感のそうめんや絹ごし豆腐も試してみてください。食事の記録が積み重なっています。';
+      updateMsg('今日もよく食べてくれたね。', 'うどんが好きなはなちゃん。同じつるっとした食感の食材から広げていくといいかもしれません。');
+    } else {
+      updateMsg('生後93日目。', 'はなちゃんのことを今日もひとつ深く知った日です。記録が積み重なるほど、この子のことが分かってきます。');
+    }
+  }
+
+  // 視点チェンジ表示
+  var rfData = getRFData(text);
+  var rfHtml = '<div class="rf-reply si">'
+    + '<div class="rf-lbl"><div class="rf-dot"></div><span class="rf-lbl-txt">今日の記録から</span></div>'
+    + '<div class="rf-msg">' + rfData.msg + '</div>'
+    + '<div class="rf-reframe">' + rfData.getRF(text) + '</div>'
+    + '<div class="rf-exp"><div class="rf-exp-lbl">同じ月齢のお母さんの体験</div>'
+    + '<div class="rf-exp-txt">' + rfData.exp.txt + '</div>'
+    + '<div class="rf-exp-who">— ' + rfData.exp.who + '</div></div>'
+    + '</div>';
+
+  // 視点チェンジは話すタブに記録されるため、わたしタブの更新は不要
+  // （rf-areaは削除済み）
+
+  // タイムラインに追加
+  var RFMAP = [
+    { kw: '笑', rf: '笑顔を引き出せた日' },
+    { kw: '食べ', rf: '食事を届けた事実が残りました' },
+    { kw: '夜泣き', rf: '眠れなかった夜も、はなちゃんの隣にいた' },
+    { kw: '泣き止まない', rf: '泣き声の中でそこにいた時間です' },
+    { kw: 'しんど', rf: '疲れを感じるのは、それだけ全力でいた証拠' },
+    { kw: '疲れ', rf: '疲れを感じるのは、それだけ全力でいた証拠' },
+    { kw: 'ベビーフード', rf: '今日もはなちゃんの食事を届けた' }
+  ];
+  var rf = 'はなちゃんのことをひとつ深く知った日';
+  for (var i = 0; i < RFMAP.length; i++) {
+    if (text.indexOf(RFMAP[i].kw) >= 0) { rf = RFMAP[i].rf; break; }
+  }
+
+  var tl = document.getElementById('tl-list');
+  var item = document.createElement('div');
+  item.className = 'tl-item';
+  item.innerHTML = '<div class="tl-lw"><div class="tl-dot" style="background:var(--rose);"></div><div class="tl-line"></div></div>'
+    + '<div style="flex:1;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:10px;">'
+    + '<div class="tl-txt">' + text + '</div>'
+    + '<div class="tl-rf">' + rf + '</div>'
+    + '<div class="tl-date">今日</div></div>';
+  tl.insertBefore(item, tl.firstChild);
+
+  document.getElementById('mood-inp').value = '';
+  document.getElementById('baby-inp').value = '';
+  document.getElementById('mood-inp').style.height = '38px';
+  document.getElementById('baby-inp').style.height = '38px';
+
+  var sc = document.getElementById('htab-me-sc');
+  setTimeout(function() { sc.scrollTop = 0; }, 50);
+}
+
+// ===== 調べる =====
+function setQ(t) {
+  var ta = document.getElementById('sh-ta');
+  ta.value = t;
+  shAuto(ta);
+}
+function goSearch(q) {
+  switchTab('search');
+  setQ(q);
+  doSearch();
+}
+function shKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSearch(); }
+}
+
+// デフォルトで夜泣き対策を展開
+function initSearch() {
+  setQ('夜泣き対策');
+  var p = DB.sleep;
+  document.getElementById('s-rq').textContent = '夜泣き対策';
+  var badge = document.getElementById('s-rbadge');
+  badge.style.display = 'inline-flex';
+  document.getElementById('s-rbadge-txt').textContent = p.ctx.txt;
+  document.getElementById('s-title').textContent = p.ai.title;
+  document.getElementById('s-body').textContent = p.ai.body;
+  var personal = document.getElementById('s-personal');
+  personal.style.display = 'block';
+  personal.textContent = p.ai.personal;
+  var chips = document.getElementById('s-chips'); chips.innerHTML = '';
+  for (var i = 0; i < p.ai.chips.length; i++) {
+    var s = document.createElement('span'); s.className = 'aa-chip'; s.textContent = p.ai.chips[i]; chips.appendChild(s);
+  }
+  var tl = document.getElementById('s-tries'); tl.innerHTML = '';
+  for (var i = 0; i < p.tries.length; i++) {
+    var t2 = p.tries[i];
+    var d = document.createElement('div'); d.className = 'try-item';
+    d.innerHTML = '<div class="try-n">' + (i+1) + '</div><div style="flex:1;"><div class="try-ttl">' + t2.t + '</div><div class="try-desc">' + t2.d + '</div>'
+      + (t2.p ? '<div class="try-p">🌸 ' + t2.p + '</div>' : '')
+      + (t2.c > 0 ? '<div class="try-c">✓ ' + t2.c + '人が試しました</div>' : '')
+      + '</div>';
+    tl.appendChild(d);
+  }
+  var el = document.getElementById('s-exps'); el.innerHTML = '';
+  var avC = ['var(--green)', 'var(--sage)', 'var(--amber)'];
+  for (var i = 0; i < p.exps.length; i++) {
+    var e = p.exps[i];
+    var d = document.createElement('div'); d.className = 'exp-card2';
+    d.innerHTML = '<div class="ec-who"><div class="ec-av" style="background:' + avC[i%3] + ';">' + e.age + '</div>'
+      + '<div><div class="ec-nm">' + e.badge + '</div><div class="ec-age">' + e.who + '</div></div></div>'
+      + '<div class="ec-txt">' + e.txt + '</div>'
+      + '<div class="ec-after"><span class="ec-al">その後</span><span class="ec-at">' + e.after + '</span></div>'
+      + '<div class="wk" onclick="wkToggle(this,' + e.w + ')" style="display:inline-flex;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg><span>わかる　' + e.w + '</span></div>';
+    el.appendChild(d);
+  }
+  document.getElementById('s-pw-ttl').textContent = '残り' + p.remaining + '人の体験談を読む';
+  document.getElementById('s-pw').style.display = 'block';
+  document.getElementById('s-res').style.display = 'block';
+}
+
+var DB = {
+  sleep: {
+    kw: ['夜泣き', '泣き止まない', '寝ない', '夜泣き対策'],
+    ctx: { hit: '外の音に敏感', txt: '音に敏感' },
+    ai: {
+      title: '音に敏感なはなちゃんには、環境音のコントロールが効果的です',
+      body: '外の音に敏感な赤ちゃんは、急な大きな音に驚いて泣くことが多いです。完全に遮音するのではなく、一定の環境音を流して突発的な音の落差を小さくするアプローチが有効です。',
+      personal: 'はなちゃんは外の音で驚きやすいという記録があります。ホワイトノイズは突発的な音の衝撃を和らげるので、特に合いやすいかもしれません。',
+      chips: ['ホワイトノイズ', '環境音アプリ', '遮光カーテン']
+    },
+    tries: [
+      { t: 'ホワイトノイズアプリを常時流す', d: '一定の「シー」という音を流すことで、外からの突発的な音との落差が小さくなります。', p: '外の音に敏感なはなちゃんに特に試す価値があります。', c: 38 },
+      { t: '遮音カーテンで外音を物理的に減らす', d: '外からの音を物理的に減らすことで、驚いて泣く頻度が下がることがあります。', p: null, c: 19 }
+    ],
+    exps: [
+      { age: '3M', bg: 'var(--green)', badge: '3M・1人目', who: '生後3ヶ月', txt: '外の音で毎回目が覚めてた。ホワイトノイズを流したら夜泣きの頻度が半分くらいになった。', after: '今は外の音があっても寝られるようになった。', w: 44 },
+      { age: '4M', bg: 'var(--sage)', badge: '4M・1人目', who: '生後4ヶ月', txt: '音に敏感だと分かってから対策できた。知る前は何で泣くか分からなくて辛かった。', after: '原因が分かると対処できる。その方が親も楽。', w: 31 }
+    ],
+    remaining: 35
+  },
+  milk: {
+    kw: ['母乳', '授乳', 'ミルク', '完母', '授乳のやり方'],
+    ctx: null,
+    ai: {
+      title: '生後3ヶ月は母乳量が安定してくる時期です',
+      body: '赤ちゃんが吸う量と頻度によって産生量が調整されます。体重が増えていれば足りています。',
+      personal: 'はなちゃんの体重が増えているか確認してみてください。増えていれば届いています。',
+      chips: ['泣いたらすぐあげる', '体重で確認', '混合も選択肢']
+    },
+    tries: [
+      { t: '授乳のタイミングを「泣いたら」に変える', d: '時間を決めずに泣いたらすぐあげる自律授乳に切り替えると、必要な量が自然に調整されます。', p: null, c: 44 },
+      { t: '混合（ミルク足し）を試す', d: '夜だけミルクを足すことで赤ちゃんも満足しやすくなります。', p: null, c: 19 }
+    ],
+    exps: [
+      { age: '3M', bg: 'var(--green)', badge: '3M・1人目', who: '生後3ヶ月', txt: '泣いたらすぐあげるようにしたら、量の不安がなくなった。', after: '生後4ヶ月で授乳リズムが安定してきた。', w: 38 },
+      { age: '3M', bg: 'var(--sage)', badge: '3M・2人目', who: '生後3ヶ月', txt: '完母諦めて混合にした。気持ちが楽になって子どもとの時間が増えた。', after: '今は完母より混合の方が良かったと思ってる。', w: 24 }
+    ],
+    remaining: 41
+  },
+  ehon: {
+    kw: ['絵本', 'おすすめの絵本', '追視'],
+    ctx: { hit: '追視が出てきた', txt: '追視が出てきた' },
+    ai: {
+      title: '生後3ヶ月は白黒・はっきり色の絵本が喜ばれます',
+      body: 'この時期の赤ちゃんは視力が発達中で、コントラストの強い色や単純な形に反応しやすいです。',
+      personal: 'はなちゃんは追視が出てきているので、ページをめくるたびに目が動くか観察してみてください。',
+      chips: ['もいもい', 'じゃあじゃあびりびり', '白黒コントラスト系']
+    },
+    tries: [
+      { t: '「もいもい」をゆっくりめくる', d: 'コントラストが強く、シンプルな絵が特徴。ページをめくるたびに追視できるか確認してみてください。', p: 'はなちゃんは追視が出てきているので特に反応しやすいはずです。', c: 52 },
+      { t: '読み聞かせより「見せる」を優先する', d: 'この月齢はストーリーより絵を見ること自体が刺激になります。', p: null, c: 38 }
+    ],
+    exps: [
+      { age: '3M', bg: 'var(--green)', badge: '3M・1人目', who: '生後3ヶ月', txt: 'もいもいを見せたら急に真顔でじっと見てた。赤ちゃんって絵本見るんだと思って嬉しかった。', after: '今でも絵本の時間が日課になってる。', w: 47 },
+      { age: '4M', bg: 'var(--sage)', badge: '4M・1人目', who: '生後4ヶ月', txt: 'じゃあじゃあびりびりは言葉の繰り返しが面白いのか、機嫌良い時に声出して反応してた。', after: '読み聞かせの習慣が1歳になっても続いてる。', w: 31 }
+    ],
+    remaining: 44
+  },
+  def: {
+    kw: [],
+    ctx: null,
+    ai: {
+      title: 'はなちゃんのことを調べています',
+      body: '気になることがあれば何でも聞いてみてください。はなちゃんの記録をもとに、この子に合った回答が届きます。',
+      personal: null,
+      chips: ['記録から最適化', '月齢に絞った回答', '体験談つき']
+    },
+    tries: [{ t: '気になることをそのまま入力してみて', d: 'はなちゃんのことを具体的に入力すると精度が上がります。', p: null, c: 0 }],
+    exps: [{ age: '3M', bg: 'var(--green)', badge: '3M・1人目', who: '生後3ヶ月', txt: '子どもの特性を記録しておくと、回答が全然違う。', after: '記録をつける習慣がついてからもっと使うようになった。', w: 38 }],
+    remaining: 0
+  }
+};
+
+function detDB(t) {
+  var keys = ['sleep', 'milk', 'ehon'];
+  for (var i = 0; i < keys.length; i++) {
+    var p = DB[keys[i]];
+    for (var j = 0; j < p.kw.length; j++) {
+      if (t.indexOf(p.kw[j]) >= 0) return p;
+    }
+  }
+  return DB.def;
+}
+
+function doSearch() {
+  var ta = document.getElementById('sh-ta');
+  var text = ta.value.trim();
+  if (!text) return;
+  ta.blur();
+  document.getElementById('s-empty').style.display = 'none';
+  document.getElementById('s-res').style.display = 'none';
+  document.getElementById('s-load').style.display = 'block';
+  document.getElementById('s-sc').scrollTop = 0;
+  setTimeout(function() {
+    document.getElementById('s-load').style.display = 'none';
+    var p = detDB(text);
+    document.getElementById('s-rq').textContent = text;
+    var badge = document.getElementById('s-rbadge');
+    if (p.ctx) {
+      badge.style.display = 'inline-flex';
+      document.getElementById('s-rbadge-txt').textContent = p.ctx.txt;
+    } else {
+      badge.style.display = 'none';
+    }
+    document.getElementById('s-title').textContent = p.ai.title;
+    document.getElementById('s-body').textContent = p.ai.body;
+    var personal = document.getElementById('s-personal');
+    if (p.ai.personal) { personal.style.display = 'block'; personal.textContent = p.ai.personal; }
+    else personal.style.display = 'none';
+    var chips = document.getElementById('s-chips');
+    chips.innerHTML = '';
+    for (var i = 0; i < p.ai.chips.length; i++) {
+      var s = document.createElement('span'); s.className = 'aa-chip'; s.textContent = p.ai.chips[i]; chips.appendChild(s);
+    }
+    var tl = document.getElementById('s-tries');
+    tl.innerHTML = '';
+    for (var i = 0; i < p.tries.length; i++) {
+      var t2 = p.tries[i];
+      var d = document.createElement('div'); d.className = 'try-item';
+      d.innerHTML = '<div class="try-n">' + (i+1) + '</div><div style="flex:1;"><div class="try-ttl">' + t2.t + '</div><div class="try-desc">' + t2.d + '</div>'
+        + (t2.p ? '<div class="try-p">🌸 ' + t2.p + '</div>' : '')
+        + (t2.c > 0 ? '<div class="try-c">✓ ' + t2.c + '人が試しました</div>' : '')
+        + '</div>';
+      tl.appendChild(d);
+    }
+    var el = document.getElementById('s-exps');
+    el.innerHTML = '';
+    var avC = ['var(--green)', 'var(--sage)', 'var(--amber)'];
+    for (var i = 0; i < p.exps.length; i++) {
+      var e = p.exps[i];
+      var d = document.createElement('div'); d.className = 'exp-card2';
+      d.innerHTML = '<div class="ec-who"><div class="ec-av" style="background:' + avC[i%3] + ';">' + e.age + '</div>'
+        + '<div><div class="ec-nm">' + e.badge + '</div><div class="ec-age">' + e.who + '</div></div></div>'
+        + '<div class="ec-txt">' + e.txt + '</div>'
+        + '<div class="ec-after"><span class="ec-al">その後</span><span class="ec-at">' + e.after + '</span></div>'
+        + '<div class="wk" onclick="wkToggle(this,' + e.w + ')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg><span>わかる　' + e.w + '</span></div>';
+      el.appendChild(d);
+    }
+    var pwTtl = document.getElementById('s-pw-ttl');
+    var pw = document.getElementById('s-pw');
+    if (p.remaining > 0) { pwTtl.textContent = '残り' + p.remaining + '人の体験談を読む'; pw.style.display = 'block'; }
+    else pw.style.display = 'none';
+    document.getElementById('s-res').style.display = 'block';
+    document.getElementById('s-sc').scrollTop = 0;
+    var fus = document.querySelectorAll('.fu,.fu2,.fu3');
+    for (var i = 0; i < fus.length; i++) {
+      var el2 = fus[i]; el2.style.animation = 'none'; el2.offsetHeight; el2.style.animation = '';
+    }
+  }, 900);
+}
+
+// ===== ネガティブカウンター =====
+var negCount = 0;
+var NEG_KW = ['しんどい', 'つらい', '辛い', '限界', '死にたい', '消えたい', 'もう無理', '疲れた', 'ダメ', '苦しい'];
+
+function checkNegative(text) {
+  var isNeg = false;
+  for (var i = 0; i < NEG_KW.length; i++) {
+    if (text.indexOf(NEG_KW[i]) >= 0) { isNeg = true; break; }
+  }
+  if (isNeg) {
+    negCount++;
+  } else {
+    negCount = 0;
+  }
+  return negCount >= 3;
+}
+
+// ===== EPDS =====
+var EPDS_Q = [
+  { q: '笑うことができたし、物事のおかしい面もわかった', opts: ['いつもと同様にできた', 'あまりできなかった', '明らかにできなかった', '全くできなかった'], scores: [0,1,2,3] },
+  { q: '物事を楽しみにして待つことができた', opts: ['いつもと同様にできた', 'あまりできなかった', '明らかにできなかった', 'ほとんどできなかった'], scores: [0,1,2,3] },
+  { q: 'うまくいかないとき、必要以上に自分を責めた', opts: ['ほとんどそういうことはなかった', 'あまりそういうことはなかった', 'そういうことがあった', 'ほとんどいつもそうだった'], scores: [0,1,2,3] },
+  { q: '理由もなく不安になったり、心配したりした', opts: ['そういうことはなかった', 'ほとんどそういうことはなかった', 'そういうことがあった', 'ひんぱんにあった'], scores: [0,1,2,3] },
+  { q: '理由もなく恐怖感におそわれた', opts: ['そういうことはなかった', 'ほとんどそういうことはなかった', 'そういうことがあった', 'ひんぱんにあった'], scores: [0,1,2,3] },
+  { q: 'することがたくさんあって大変だった', opts: ['いつもどおりにこなした', 'いつもどおりにこなしたが、うまくできなかった', 'いつもどおりにはできなかった', '全くできなかった'], scores: [0,1,2,3] },
+  { q: '不幸せな気分なので、眠りにくかった', opts: ['そういうことはなかった', 'あまりそういうことはなかった', 'そういうことがあった', 'ひんぱんにあった'], scores: [0,1,2,3] },
+  { q: '悲しくなったり、惨めになったりした', opts: ['そういうことはなかった', 'あまりそういうことはなかった', 'ひんぱんにあった', 'ほとんどいつもそうだった'], scores: [0,1,2,3] },
+  { q: '不幸せな気分だったので、泣いていた', opts: ['そういうことはなかった', 'あまりそういうことはなかった', 'そういうことがあった', 'ほとんどいつもそうだった'], scores: [0,1,2,3] },
+  { q: '自分自身を傷つけることを考えた', opts: ['そういうことはなかった', 'めったになかった', 'ときどきあった', 'ひんぱんにあった'], scores: [0,1,2,3] }
+];
+
+var epdsAnswers = new Array(10).fill(-1);
+
+function openEpds() {
+  epdsAnswers = new Array(10).fill(-1);
+  document.getElementById('epds-q-area').style.display = 'block';
+  document.getElementById('epds-result').style.display = 'none';
+  var qArea = document.getElementById('epds-questions');
+  qArea.innerHTML = '';
+  EPDS_Q.forEach(function(item, qi) {
+    var div = document.createElement('div');
+    div.style.cssText = 'margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--line);';
+    var html = '<div style="font-size:13px;font-weight:500;color:var(--ink);line-height:1.6;margin-bottom:10px;">'
+      + (qi+1) + '. ' + item.q + '</div>';
+    item.opts.forEach(function(opt, oi) {
+      html += '<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;cursor:pointer;margin-bottom:4px;transition:background .15s;" onclick="this.style.background=\'var(--gbg)\'">'
+        + '<input type="radio" name="epds_' + qi + '" value="' + oi + '" onchange="epdsAnswers[' + qi + ']=' + item.scores[oi] + '" style="accent-color:var(--green);width:16px;height:16px;flex-shrink:0;">'
+        + '<span style="font-size:12px;color:var(--mid);line-height:1.5;">' + opt + '</span></label>';
+    });
+    div.innerHTML = html;
+    qArea.appendChild(div);
+  });
+  document.getElementById('epds-ov').classList.add('show');
+}
+
+function calcEpds() {
+  var unanswered = false;
+  for (var i = 0; i < 10; i++) {
+    if (epdsAnswers[i] < 0) { unanswered = true; break; }
+  }
+  if (unanswered) {
+    alert('全ての質問に答えてください');
+    return;
+  }
+  var total = 0;
+  for (var i = 0; i < 10; i++) total += epdsAnswers[i];
+
+  var scoreHtml = '';
+  var resultEl = document.getElementById('epds-score-display');
+
+  if (total <= 8) {
+    scoreHtml = '<div style="text-align:center;margin-bottom:16px;">'
+      + '<div style="font-size:48px;font-family:\'Zen Kaku Gothic New\',sans-serif;font-weight:900;color:var(--green);">' + total + '</div>'
+      + '<div style="font-size:12px;color:var(--mute);">/ 30点</div></div>'
+      + '<div style="background:var(--gbg);border-radius:12px;padding:14px 16px;border-left:3px solid var(--green);margin-bottom:14px;">'
+      + '<div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:5px;">今は比較的安定しています</div>'
+      + '<div style="font-size:12px;color:var(--mid);line-height:1.65;">引き続き記録を続けていきましょう。しんどいと感じたらいつでも話してください。</div></div>';
+  } else if (total <= 12) {
+    scoreHtml = '<div style="text-align:center;margin-bottom:16px;">'
+      + '<div style="font-size:48px;font-family:\'Zen Kaku Gothic New\',sans-serif;font-weight:900;color:var(--amber);">' + total + '</div>'
+      + '<div style="font-size:12px;color:var(--mute);">/ 30点</div></div>'
+      + '<div style="background:var(--abg);border-radius:12px;padding:14px 16px;border-left:3px solid var(--amber);margin-bottom:14px;">'
+      + '<div style="font-size:13px;font-weight:600;color:var(--amber);margin-bottom:5px;">少し疲れているサインがあります</div>'
+      + '<div style="font-size:12px;color:var(--mid);line-height:1.65;">一人で抱え込まず、パートナーや身近な人に話してみてください。しんどさが続く場合は専門家への相談も選択肢のひとつです。</div></div>'
+      + '<div style="font-size:12px;color:var(--mute);line-height:1.6;">このスコアは診断ではありません。気になる場合は産婦人科・保健師に相談してみてください。</div>';
+  } else {
+    scoreHtml = '<div style="text-align:center;margin-bottom:16px;">'
+      + '<div style="font-size:48px;font-family:\'Zen Kaku Gothic New\',sans-serif;font-weight:900;color:var(--rose);">' + total + '</div>'
+      + '<div style="font-size:12px;color:var(--mute);">/ 30点</div></div>'
+      + '<div style="background:var(--rbg);border-radius:12px;padding:14px 16px;border-left:3px solid var(--rose);margin-bottom:14px;">'
+      + '<div style="font-size:13px;font-weight:600;color:var(--rose);margin-bottom:5px;">今の状態について、誰かに話してみてください</div>'
+      + '<div style="font-size:12px;color:var(--mid);line-height:1.65;">今のしんどさはあなただけのものではありません。産婦人科や保健師に今の状態を伝えてみてください。一人で抱えなくていいです。</div></div>'
+      + '<div style="background:var(--card);border-radius:12px;padding:12px 14px;border:1px solid var(--line);">'
+      + '<div style="font-size:11px;font-weight:600;color:var(--ink);margin-bottom:8px;">相談できる場所</div>'
+      + '<div style="font-size:12px;color:var(--mid);line-height:1.8;">産婦人科・かかりつけ医<br>保健師（母子健康手帳の窓口）<br>産後ケアセンター<br>よりそいホットライン 0120-279-338</div></div>';
+  }
+
+  // わたしタブのチェック結果エリアを更新
+  var resultArea = document.getElementById('epds-result-area');
+  resultArea.style.display = 'block';
+  resultArea.innerHTML = '<div style="background:' + (total<=8?'var(--gbg)':total<=12?'var(--abg)':'var(--rbg)') + ';border-radius:10px;padding:10px 12px;margin-bottom:10px;">'
+    + '<div style="font-size:11px;color:' + (total<=8?'var(--green)':total<=12?'var(--amber)':'var(--rose)') + ';font-weight:600;">前回のチェック結果：' + total + '点</div>'
+    + '<div style="font-size:11px;color:var(--mid);margin-top:2px;">' + (total<=8?'安定しています':total<=12?'少し疲れているサインあり':'専門家への相談をおすすめします') + '</div></div>';
+  document.getElementById('epds-btn').textContent = '再度チェックする';
+
+  resultEl.innerHTML = scoreHtml;
+  document.getElementById('epds-q-area').style.display = 'none';
+  document.getElementById('epds-result').style.display = 'block';
+}
+
+function clsEpdsBtn() { document.getElementById('epds-ov').classList.remove('show'); }
+function clsEpds(e) { if (e.target === document.getElementById('epds-ov')) document.getElementById('epds-ov').classList.remove('show'); }
+
+// ===== 話す =====
+function selMood(btn) {
+  var btns = document.querySelectorAll('.mood-btn');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('sel');
+  btn.classList.add('sel');
+}
+function setTA(t) { var ta = document.getElementById('chat-ta'); ta.value = t; taAuto(ta); ta.focus(); }
+
+var TALK_DATA = {
+  sleep: { kw: ['夜泣き', '泣き止まない', '寝ない', '寝れない'], n: 38,
+    warm: 'それはしんどかったですね。<br>眠れなかった夜も、<strong>はなちゃんの隣にいた。</strong><br>それは変わらない事実です。',
+    exp: { age: '3M', bg: 'var(--green)', who: '生後3ヶ月・1人目', txt: '「夜泣き2週間続いた。でも生後5ヶ月で突然寝るようになった。あの頃の自分に「必ず終わるよ」って言いたい」', after: '今は夜ちゃんと寝てる。あの時期が嘘みたい。', w: 31 },
+    suggest: '音に敏感なはなちゃんに合った夜泣き対策を調べられます。' },
+  milk: { kw: ['母乳', '授乳', 'ミルク', '完母'], n: 47,
+    warm: '不安になりますよね。<br><strong>体重が増えていれば、ちゃんと届いています。</strong><br>泣く＝空腹とは限りません。',
+    exp: { age: '3M', bg: 'var(--sage)', who: '生後3ヶ月・2人目', txt: '「完母にこだわってたけど諦めて混合にした。気持ちが楽になって子どもとの時間が増えた」', after: '今は完母より混合の方が良かったと思ってる。', w: 24 },
+    suggest: 'はなちゃんに合った授乳の方法を調べられます。' },
+  self: { kw: ['ベビーフード', '罪悪感', 'ダメ', 'ごめん', 'できなかった'], n: 19,
+    warm: '自分を責めてるんですね。<br>ベビーフードを用意したのは<br><strong>今日もはなちゃんの食事を届けた</strong>ということです。',
+    exp: { age: '4M', bg: 'var(--rose)', who: '生後4ヶ月・2人目', txt: '「ベビーフード2週間続けた。子どもは今も元気に走り回ってる。あの頃の自分に「それで全然よかった」と言いたい」', after: '今は気にならなくなった。続けてよかった。', w: 41 },
+    suggest: null },
+  tsurai: { kw: ['つらい', '辛い', 'しんどい', '限界', '疲れ'], n: 19,
+    warm: 'しんどいって言えてよかった。<br>一人で抱えなくていいです。<br><strong>限界を感じるのは、それだけ全力でいた証拠</strong>です。',
+    exp: { age: '3M', bg: 'var(--green)', who: '生後3ヶ月・1人目', txt: '「しんどいのは自分が弱いせいだと思ってた。でも同じ月齢のお母さんがみんな同じだと知って少し楽になった」', after: '今は少し楽になった。一人じゃないと思えるだけで全然違う。', w: 38 },
+    suggest: null },
+  otto: { kw: ['夫', '旦那', '手伝'], n: 24,
+    warm: 'それは辛いですね。<br>一番近くにいる人に分かってもらえないのは<br><strong>本当に孤独</strong>です。',
+    exp: { age: '4M', bg: 'var(--sage)', who: '生後4ヶ月・1人目', txt: '「言わないと分からないと気づいてから、具体的にお願いするようにした。夜中の授乳だけ交代してもらった」', after: 'それだけで全然違った。諦めずに伝えてよかった。', w: 44 },
+    suggest: null },
+  def: { kw: [], n: 7,
+    warm: '今日もここに来てくれてありがとう。<br><strong>話すだけで、少し軽くなることがあります。</strong>',
+    exp: { age: '3M', bg: 'var(--green)', who: '生後3ヶ月・1人目', txt: '「毎日自分を責めてた。でも子どもは笑ってくれてる。それだけで十分だと思うようにした」', after: '今もしんどい日はあるけど、少し楽になった。', w: 52 },
+    suggest: null }
+};
+
+function detTalk(t) {
+  var keys = ['sleep', 'milk', 'self', 'tsurai', 'otto'];
+  for (var i = 0; i < keys.length; i++) {
+    var p = TALK_DATA[keys[i]];
+    for (var j = 0; j < p.kw.length; j++) {
+      if (t.indexOf(p.kw[j]) >= 0) return p;
+    }
+  }
+  return TALK_DATA.def;
+}
+
+function sendTalk() {
+  var ta = document.getElementById('chat-ta');
+  var text = ta.value.trim();
+  if (!text) return;
+  ta.value = ''; ta.style.height = 'auto';
+  var feed = document.getElementById('chat-feed');
+  var now = new Date();
+  var time = now.getHours() + ':' + ('0' + now.getMinutes()).slice(-2);
+
+  var ud = document.createElement('div'); ud.className = 'ub si';
+  ud.innerHTML = '<div class="um">' + text + '</div><div class="ut">' + time + '</div>';
+  feed.insertBefore(ud, feed.lastElementChild);
+  scTalk();
+
+  var ld = document.createElement('div'); ld.className = 'ab';
+  ld.innerHTML = '<div class="av">🌱</div><div class="am" style="display:flex;gap:5px;align-items:center;padding:14px;"><div class="ldd"></div><div class="ldd"></div><div class="ldd"></div></div>';
+  feed.insertBefore(ld, feed.lastElementChild);
+  scTalk();
+
+  setTimeout(function() {
+    ld.remove();
+    var p = detTalk(text);
+    var shouldPromptEpds = checkNegative(text);
+    var res = document.createElement('div'); res.className = 'ab si'; res.style.alignItems = 'flex-start';
+    var suggestHtml = '';
+    if (p.suggest) {
+      suggestHtml = '<div class="suggest-s"><div class="ss-lbl">💡 調べてみますか？</div>'
+        + '<div style="font-size:12px;color:var(--mid);">' + p.suggest + '</div>'
+        + '<button class="ss-btn" onclick="goSearch(\'' + text + '\')">調べてみる →</button></div>';
+    }
+    var epdsPromptHtml = '';
+    if (shouldPromptEpds) {
+      negCount = 0;
+      epdsPromptHtml = '<div style="background:var(--rbg);border-radius:12px;border:1px solid rgba(184,80,104,.2);padding:13px 14px;">'
+        + '<div style="font-size:12px;font-weight:600;color:var(--rose);margin-bottom:5px;">最近しんどいことが続いていますね</div>'
+        + '<div style="font-size:12px;color:var(--mid);line-height:1.65;margin-bottom:10px;">少し自分の状態を確認してみませんか？10問のチェックで今の状態が分かります。</div>'
+        + '<button onclick="switchTab(\'home\');switchHTab(\'me\');setTimeout(function(){openEpds();},200)" style="background:var(--rose);color:white;font-size:12px;font-weight:600;padding:8px 18px;border-radius:20px;border:none;cursor:pointer;font-family:\'Noto Sans JP\',sans-serif;">確認してみる →</button></div>';
+    }
+    res.innerHTML = '<div class="av">🌱</div>'
+      + '<div style="display:flex;flex-direction:column;gap:10px;flex:1;">'
+      + '<div class="recv-card"><div class="recv-top"><div class="recv-dot"></div><span class="recv-lbl">受け取りました</span><span class="recv-cnt">— 今日' + p.n + '人目</span></div><div class="recv-num">' + p.n + '</div><div class="recv-sub">人が今日、同じ気持ちを話しました。<br>あなたは一人じゃありません。</div></div>'
+      + '<div class="warm-card">' + p.warm + '</div>'
+      + '<div class="talk-exp"><div class="te-top"><div class="te-av" style="background:' + p.exp.bg + ';">' + p.exp.age + '</div><span class="te-who">' + p.exp.who + 'のお母さん</span></div><div class="te-txt">' + p.exp.txt + '</div><div class="te-after"><span class="te-al">今</span><span class="te-at">' + p.exp.after + '</span></div><button class="wk" onclick="wkToggle(this,' + p.exp.w + ')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg><span>わかる　' + p.exp.w + '</span></button></div>'
+      + suggestHtml
+      + epdsPromptHtml
+      + '</div>';
+    feed.insertBefore(res, feed.lastElementChild);
+    scTalk();
+  }, 1000);
+}
+
+document.getElementById('chat-ta').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendTalk(); }
+});
+
+function scTalk() {
+  var s = document.getElementById('talk-sc');
+  setTimeout(function() { s.scrollTop = s.scrollHeight; }, 50);
+}
+
+// ===== わかる =====
+function wkToggle(el, n) {
+  var on = el.classList.toggle('on');
+  var sp = el.querySelector('span');
+  var sv = el.querySelector('svg');
+  if (on) { sp.textContent = 'わかる　' + (n + 1); sv.classList.add('hp'); setTimeout(function() { sv.classList.remove('hp'); }, 300); }
+  else sp.textContent = 'わかる　' + n;
+}
+
+// ===== モーダル =====
+function openPay() { document.getElementById('pay-ov').classList.add('show'); }
+function clsPay(e) { if (e.target === document.getElementById('pay-ov')) document.getElementById('pay-ov').classList.remove('show'); }
+</script>
+</body>
+</html>
